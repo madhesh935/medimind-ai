@@ -8,9 +8,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRole, setRole, roleMeta, type Role } from "@/lib/role-store";
+import { useRole, roleMeta, type Role } from "@/lib/role-store";
 
 const roleBadgeStyles: Record<Role, string> = {
   patient: "border-primary/40 bg-primary/10 text-primary",
