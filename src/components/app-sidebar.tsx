@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Pill, Radio, Bot, FileBarChart, Bell, ScanLine, RefreshCcw,
   Settings, Activity, Users, Stethoscope, HardDrive, ScrollText, LineChart,
   HeartPulse, AlertTriangle, ClipboardList, Calendar, PhoneCall, History,
-  BookOpen, NotebookPen, SlidersHorizontal, ServerCog, LogOut,
+  BookOpen, NotebookPen, SlidersHorizontal, ServerCog,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -31,7 +31,6 @@ const menus: Record<Role, Item[][]> = {
       { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
       { title: "Refill Center", url: "/refill", icon: RefreshCcw },
       { title: "Settings", url: "/settings", icon: Settings },
-      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
   caregiver: [
@@ -50,7 +49,6 @@ const menus: Record<Role, Item[][]> = {
       { title: "Emergency Contacts", url: "/emergency-contacts", icon: PhoneCall },
       { title: "Patient History", url: "/patient-history", icon: History },
       { title: "Settings", url: "/settings", icon: Settings },
-      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
   doctor: [
@@ -70,7 +68,6 @@ const menus: Record<Role, Item[][]> = {
       { title: "Medicine Database", url: "/medicine-database", icon: BookOpen },
       { title: "Clinical Notes", url: "/clinical-notes", icon: NotebookPen },
       { title: "Settings", url: "/settings", icon: Settings },
-      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
   admin: [
@@ -92,7 +89,6 @@ const menus: Record<Role, Item[][]> = {
       { title: "Platform Settings", url: "/platform-settings", icon: SlidersHorizontal },
       { title: "System Health", url: "/system-health", icon: ServerCog },
       { title: "Settings", url: "/settings", icon: Settings },
-      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
 };
