@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppVoiceRouteImport } from './routes/_app.voice'
 import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppVoiceRoute = AppVoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSmartBottleRoute = AppSmartBottleRouteImport.update({
   id: '/smart-bottle',
@@ -45,12 +51,14 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/medication': typeof AppMedicationRoute
   '/smart-bottle': typeof AppSmartBottleRoute
+  '/voice': typeof AppVoiceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/medication': typeof AppMedicationRoute
   '/smart-bottle': typeof AppSmartBottleRoute
+  '/voice': typeof AppVoiceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/medication': typeof AppMedicationRoute
   '/_app/smart-bottle': typeof AppSmartBottleRoute
+  '/_app/voice': typeof AppVoiceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/medication' | '/smart-bottle'
+  fullPaths: '/' | '/dashboard' | '/medication' | '/smart-bottle' | '/voice'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/medication' | '/smart-bottle'
+  to: '/' | '/dashboard' | '/medication' | '/smart-bottle' | '/voice'
   id:
     | '__root__'
     | '/'
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/medication'
     | '/_app/smart-bottle'
+    | '/_app/voice'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +104,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/voice': {
+      id: '/_app/voice'
+      path: '/voice'
+      fullPath: '/voice'
+      preLoaderRoute: typeof AppVoiceRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/smart-bottle': {
       id: '/_app/smart-bottle'
@@ -123,12 +140,14 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppMedicationRoute: typeof AppMedicationRoute
   AppSmartBottleRoute: typeof AppSmartBottleRoute
+  AppVoiceRoute: typeof AppVoiceRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppMedicationRoute: AppMedicationRoute,
   AppSmartBottleRoute: AppSmartBottleRoute,
+  AppVoiceRoute: AppVoiceRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
