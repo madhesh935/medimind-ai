@@ -24,17 +24,15 @@ const menus: Record<Role, Section[]> = {
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
       { title: "Medication", url: "/medication", icon: Pill },
       { title: "Smart Bottle", url: "/smart-bottle", icon: Radio },
-      { title: "Medication Calendar", url: "/medication-calendar", icon: Calendar },
+      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
     ],
     [
       { title: "Reports", url: "/reports", icon: FileBarChart },
-      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
       { title: "Notifications", url: "/notifications", icon: Bell },
     ],
     [
       { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
       { title: "Refill Center", url: "/refill", icon: RefreshCcw },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
   caregiver: [
@@ -52,7 +50,6 @@ const menus: Record<Role, Section[]> = {
     [
       { title: "Emergency Contacts", url: "/emergency-contacts", icon: PhoneCall },
       { title: "Patient History", url: "/patient-history", icon: History },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
   doctor: [
@@ -71,7 +68,6 @@ const menus: Record<Role, Section[]> = {
     [
       { title: "Medicine Database", url: "/medicine-database", icon: BookOpen },
       { title: "Clinical Notes", url: "/clinical-notes", icon: NotebookPen },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
   admin: [
@@ -92,10 +88,20 @@ const menus: Record<Role, Section[]> = {
       { title: "Audit Logs", url: "/audit-logs", icon: ScrollText },
       { title: "Platform Settings", url: "/platform-settings", icon: SlidersHorizontal },
       { title: "System Health", url: "/system-health", icon: ServerCog },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
 };
+
+// Overrides the shadcn primitive's collapsed !size-8/!p-2 so items become
+// a 48x48 rounded pill perfectly centered inside the 88px collapsed rail.
+const BTN_CLASS =
+  "h-12 rounded-2xl px-4 text-[13px] font-medium transition-all duration-300 " +
+  "hover:bg-primary/10 hover:scale-[1.02] active:scale-[0.98] " +
+  "data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground " +
+  "data-[active=true]:shadow-glow data-[active=true]:hover:brightness-110 " +
+  "group-data-[collapsible=icon]:!size-12 group-data-[collapsible=icon]:!p-0 " +
+  "group-data-[collapsible=icon]:!rounded-2xl group-data-[collapsible=icon]:mx-auto " +
+  "group-data-[collapsible=icon]:justify-center";
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -115,18 +121,30 @@ export function AppSidebar() {
       .filter((s) => s.length > 0);
   }, [role, query]);
 
+  const settingsItem: Item = { title: "Settings", url: "/settings", icon: Settings };
+  const settingsActive = isActive(settingsItem.url);
+
   return (
     <Sidebar
       collapsible="icon"
       className="border-r border-border/60 [&_[data-slot=sidebar-container]]:transition-[width,left,right] [&_[data-slot=sidebar-container]]:duration-300 [&_[data-slot=sidebar-container]]:ease-out [&_[data-slot=sidebar-container]]:bg-background/95 [&_[data-slot=sidebar-container]]:backdrop-blur-xl [&_[data-slot=sidebar-container]]:shadow-[0_8px_40px_-12px_rgba(15,23,42,0.08)] [&_[data-slot=sidebar-gap]]:transition-[width] [&_[data-slot=sidebar-gap]]:duration-300 [&_[data-slot=sidebar-gap]]:ease-out"
     >
-      <SidebarHeader className={`${collapsed ? "px-2 py-5" : "px-5 py-6"}`}>
-        <Link to="/dashboard" className={`flex items-center overflow-hidden ${collapsed ? "justify-center" : "gap-3"}`}>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow transition-transform duration-300 hover:scale-105">
-            <Activity className="h-5 w-5 text-white" />
+      <SidebarHeader className={collapsed ? "px-0 py-5" : "px-5 py-6"}>
+        <Link
+          to="/dashboard"
+          className={`flex items-center overflow-hidden ${collapsed ? "justify-center" : "gap-3"}`}
+        >
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow transition-transform duration-300 hover:scale-105">
+            <Activity className="h-[22px] w-[22px] text-white" />
           </div>
-          <div className={`flex flex-col leading-tight transition-all duration-300 ${collapsed ? "w-0 -translate-x-2 opacity-0" : "w-auto translate-x-0 opacity-100"}`}>
-            <span className="font-display text-lg font-bold tracking-tight whitespace-nowrap">MediMind</span>
+          <div
+            className={`flex flex-col leading-tight transition-all duration-300 ${
+              collapsed ? "w-0 -translate-x-2 opacity-0" : "w-auto translate-x-0 opacity-100"
+            }`}
+          >
+            <span className="font-display text-lg font-bold tracking-tight whitespace-nowrap">
+              MediMind
+            </span>
             <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground whitespace-nowrap">
               AI Health
             </span>
@@ -148,36 +166,48 @@ export function AppSidebar() {
         </div>
       )}
 
-      <SidebarContent className={`${collapsed ? "px-1" : "px-3"} gap-0`}>
+      <SidebarContent className={`${collapsed ? "px-0 items-center" : "px-3"} gap-0`}>
         {sections.map((items, idx) => (
-          <div key={idx}>
-            {idx > 0 && (
-              <div className={`${collapsed ? "mx-3" : "mx-2"} my-2 h-px bg-border/60`} />
+          <div key={idx} className={collapsed ? "w-full" : ""}>
+            {idx > 0 && !collapsed && (
+              <div className="mx-2 my-2 h-px bg-border/60" />
             )}
+            {idx > 0 && collapsed && <div className="h-3" />}
             <SidebarGroup className="animate-fade-in py-1">
               <SidebarGroupContent>
-                <SidebarMenu className="gap-1.5">
+                <SidebarMenu className={`gap-1.5 ${collapsed ? "items-center" : ""}`}>
                   {items.map((item) => {
                     const active = isActive(item.url);
                     return (
-                      <SidebarMenuItem key={item.title} className="group/menu-item">
+                      <SidebarMenuItem
+                        key={item.title}
+                        className={`group/menu-item ${collapsed ? "w-12" : ""}`}
+                      >
                         <SidebarMenuButton
                           asChild
                           isActive={active}
                           tooltip={item.title}
-                          className="h-12 rounded-2xl px-4 text-[13px] font-medium transition-all duration-300 hover:bg-primary/10 hover:scale-[1.02] active:scale-[0.98] data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-glow data-[active=true]:hover:brightness-110"
+                          className={BTN_CLASS}
                         >
                           <Link to={item.url}>
-                            <span className="relative flex w-full items-center gap-3">
-                              {active && (
+                            <span
+                              className={`relative flex w-full items-center gap-3 ${
+                                collapsed ? "justify-center" : ""
+                              }`}
+                            >
+                              {active && !collapsed && (
                                 <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-white/90 shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-scale-in" />
                               )}
-                              <item.icon className={`h-[22px] w-[22px] shrink-0 transition-transform duration-300 ${active ? "text-white" : "text-muted-foreground group-hover/menu-item:text-primary"} group-hover/menu-item:scale-110`} />
-                              <span
-                                className={`truncate transition-all duration-300 ${collapsed ? "w-0 -translate-x-2 opacity-0" : "w-auto opacity-100"}`}
-                              >
-                                {item.title}
-                              </span>
+                              <item.icon
+                                className={`!h-[22px] !w-[22px] shrink-0 transition-transform duration-300 ${
+                                  active
+                                    ? "text-white"
+                                    : "text-muted-foreground group-hover/menu-item:text-primary"
+                                } group-hover/menu-item:scale-110`}
+                              />
+                              {!collapsed && (
+                                <span className="truncate animate-fade-in">{item.title}</span>
+                              )}
                             </span>
                           </Link>
                         </SidebarMenuButton>
@@ -196,12 +226,49 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className={`mt-auto gap-2 border-t border-border/60 ${collapsed ? "p-2" : "p-3"}`}>
+      <SidebarFooter
+        className={`mt-auto gap-2 border-t border-border/60 ${
+          collapsed ? "items-center p-2" : "p-3"
+        }`}
+      >
+        {/* Settings pinned above profile so both align at the bottom */}
+        <SidebarMenu className={collapsed ? "items-center" : ""}>
+          <SidebarMenuItem className={`group/menu-item ${collapsed ? "w-12" : ""}`}>
+            <SidebarMenuButton
+              asChild
+              isActive={settingsActive}
+              tooltip={settingsItem.title}
+              className={BTN_CLASS}
+            >
+              <Link to={settingsItem.url}>
+                <span
+                  className={`relative flex w-full items-center gap-3 ${
+                    collapsed ? "justify-center" : ""
+                  }`}
+                >
+                  <Settings
+                    className={`!h-[22px] !w-[22px] shrink-0 transition-transform duration-300 ${
+                      settingsActive
+                        ? "text-white"
+                        : "text-muted-foreground group-hover/menu-item:text-primary"
+                    } group-hover/menu-item:scale-110`}
+                  />
+                  {!collapsed && <span className="truncate animate-fade-in">Settings</span>}
+                </span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
         <div
-          className={`flex items-center rounded-2xl border border-border/60 bg-card/60 transition-all duration-300 ${collapsed ? "h-10 w-10 justify-center border-0 bg-transparent p-0 mx-auto" : "gap-3 p-3"}`}
+          className={`flex items-center rounded-2xl transition-all duration-300 ${
+            collapsed
+              ? "h-12 w-12 justify-center bg-transparent p-0 mx-auto"
+              : "gap-3 border border-border/60 bg-card/60 p-3"
+          }`}
           title={collapsed ? `${meta.user} · ${meta.label}` : undefined}
         >
-          <Avatar className="h-9 w-9 shrink-0">
+          <Avatar className={collapsed ? "h-10 w-10 shrink-0" : "h-9 w-9 shrink-0"}>
             <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">
               {meta.initials}
             </AvatarFallback>
@@ -217,9 +284,13 @@ export function AppSidebar() {
         <button
           onClick={() => nav({ to: "/" })}
           title={collapsed ? "Logout" : undefined}
-          className={`flex items-center rounded-2xl text-destructive transition-all duration-300 hover:bg-destructive/10 hover:scale-[1.02] active:scale-[0.98] ${collapsed ? "mx-auto h-10 w-10 justify-center" : "w-full gap-3 border border-border/60 bg-card/40 px-3 py-2.5 text-xs font-medium"}`}
+          className={`flex items-center rounded-2xl text-destructive transition-all duration-300 hover:bg-destructive/10 hover:scale-[1.02] active:scale-[0.98] ${
+            collapsed
+              ? "mx-auto h-12 w-12 justify-center"
+              : "w-full gap-3 border border-border/60 bg-card/40 px-3 py-2.5 text-xs font-medium"
+          }`}
         >
-          <LogOut className="h-[18px] w-[18px] shrink-0" />
+          <LogOut className="h-[20px] w-[20px] shrink-0" />
           {!collapsed && <span className="animate-fade-in">Logout</span>}
         </button>
       </SidebarFooter>
