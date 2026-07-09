@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppVoiceRouteImport } from './routes/_app.voice'
 import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
+import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 
 const AppRoute = AppRouteImport.update({
@@ -40,6 +41,11 @@ const AppMedicationRoute = AppMedicationRouteImport.update({
   path: '/medication',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInsightsRoute = AppInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -49,6 +55,7 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
+  '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
   '/smart-bottle': typeof AppSmartBottleRoute
   '/voice': typeof AppVoiceRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
+  '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
   '/smart-bottle': typeof AppSmartBottleRoute
   '/voice': typeof AppVoiceRoute
@@ -65,20 +73,34 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/insights': typeof AppInsightsRoute
   '/_app/medication': typeof AppMedicationRoute
   '/_app/smart-bottle': typeof AppSmartBottleRoute
   '/_app/voice': typeof AppVoiceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/medication' | '/smart-bottle' | '/voice'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/medication'
+    | '/smart-bottle'
+    | '/voice'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/medication' | '/smart-bottle' | '/voice'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/insights'
+    | '/medication'
+    | '/smart-bottle'
+    | '/voice'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/dashboard'
+    | '/_app/insights'
     | '/_app/medication'
     | '/_app/smart-bottle'
     | '/_app/voice'
@@ -126,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMedicationRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/insights': {
+      id: '/_app/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AppInsightsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -138,6 +167,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
+  AppInsightsRoute: typeof AppInsightsRoute
   AppMedicationRoute: typeof AppMedicationRoute
   AppSmartBottleRoute: typeof AppSmartBottleRoute
   AppVoiceRoute: typeof AppVoiceRoute
@@ -145,6 +175,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
+  AppInsightsRoute: AppInsightsRoute,
   AppMedicationRoute: AppMedicationRoute,
   AppSmartBottleRoute: AppSmartBottleRoute,
   AppVoiceRoute: AppVoiceRoute,
