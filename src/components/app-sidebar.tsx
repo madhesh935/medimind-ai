@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Pill, Radio, Bot, FileBarChart, Bell, ScanLine, RefreshCcw,
   Settings, Activity, Users, Stethoscope, HardDrive, ScrollText, LineChart,
   HeartPulse, AlertTriangle, ClipboardList, Calendar, PhoneCall, History,
-  BookOpen, NotebookPen, SlidersHorizontal, ServerCog,
+  BookOpen, NotebookPen, SlidersHorizontal, ServerCog, LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -31,6 +31,7 @@ const menus: Record<Role, Item[][]> = {
       { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
       { title: "Refill Center", url: "/refill", icon: RefreshCcw },
       { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
   caregiver: [
@@ -49,6 +50,7 @@ const menus: Record<Role, Item[][]> = {
       { title: "Emergency Contacts", url: "/emergency-contacts", icon: PhoneCall },
       { title: "Patient History", url: "/patient-history", icon: History },
       { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
   doctor: [
@@ -68,6 +70,7 @@ const menus: Record<Role, Item[][]> = {
       { title: "Medicine Database", url: "/medicine-database", icon: BookOpen },
       { title: "Clinical Notes", url: "/clinical-notes", icon: NotebookPen },
       { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
   admin: [
@@ -89,6 +92,7 @@ const menus: Record<Role, Item[][]> = {
       { title: "Platform Settings", url: "/platform-settings", icon: SlidersHorizontal },
       { title: "System Health", url: "/system-health", icon: ServerCog },
       { title: "Settings", url: "/settings", icon: Settings },
+      { title: "Logout", url: "/", icon: LogOut },
     ],
   ],
 };
@@ -106,7 +110,7 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-r border-border/60 [&_[data-slot=sidebar-container]]:transition-[width,left,right] [&_[data-slot=sidebar-container]]:duration-300 [&_[data-slot=sidebar-container]]:ease-out [&_[data-slot=sidebar-gap]]:transition-[width] [&_[data-slot=sidebar-gap]]:duration-300 [&_[data-slot=sidebar-gap]]:ease-out"
     >
-      {/* Logo — 72px tall, centered */}
+      {/* Logo */}
       <SidebarHeader className="h-[72px] shrink-0 flex-row items-center gap-3 border-b border-border/50 px-5 py-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
         <Link to="/dashboard" className="flex h-full w-full items-center gap-3 overflow-hidden group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-primary shadow-glow transition-transform duration-300 hover:scale-105">
@@ -121,12 +125,12 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="flex flex-col gap-0 px-4 pt-5 pb-5 group-data-[collapsible=icon]:px-3">
+      <SidebarContent className="flex flex-col px-4 pt-3 pb-4 group-data-[collapsible=icon]:px-3">
         <TooltipProvider delayDuration={0}>
           {groups.map((items, gi) => (
             <div
               key={gi}
-              className={`flex flex-col gap-2 ${gi > 0 ? "mt-4 pt-4 border-t border-border/40" : ""}`}
+              className={`flex flex-col gap-2 ${gi > 0 ? "mt-5 pt-5 border-t border-[#E5E7EB] dark:border-white/10" : ""}`}
             >
               {items.map((item) => {
                 const active = isActive(item.url);
@@ -139,11 +143,11 @@ export function AppSidebar() {
                       "transition-all duration-300 ease-out",
                       active
                         ? "bg-gradient-primary text-white shadow-[0_6px_20px_-6px_rgba(99,102,241,0.55)]"
-                        : "text-foreground/80 hover:bg-muted hover:scale-[1.02]",
+                        : "text-foreground/80 hover:bg-muted/60 hover:text-foreground",
                       collapsed ? "justify-center px-0 w-12 mx-auto" : "",
                     ].join(" ")}
                   >
-                    <item.icon className={`h-5 w-5 shrink-0 ${active ? "text-white" : ""}`} strokeWidth={2} />
+                    <item.icon className="h-5 w-5 shrink-0" strokeWidth={2} />
                     {!collapsed && <span className="truncate">{item.title}</span>}
                   </Link>
                 );
