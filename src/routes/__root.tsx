@@ -77,14 +77,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "MediMind AI — Intelligent Medication Adherence" },
+      {
+        name: "description",
+        content:
+          "AI-powered medication adherence platform with smart bottles, voice reminders and clinician insights.",
+      },
+      { property: "og:title", content: "MediMind AI" },
+      {
+        property: "og:description",
+        content: "Never miss a dose. Live better with MediMind AI.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
