@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppSmartBottleRoute = AppSmartBottleRouteImport.update({
+  id: '/smart-bottle',
+  path: '/smart-bottle',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppMedicationRoute = AppMedicationRouteImport.update({
   id: '/medication',
@@ -38,11 +44,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/medication': typeof AppMedicationRoute
+  '/smart-bottle': typeof AppSmartBottleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/medication': typeof AppMedicationRoute
+  '/smart-bottle': typeof AppSmartBottleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,13 +58,20 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/medication': typeof AppMedicationRoute
+  '/_app/smart-bottle': typeof AppSmartBottleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/medication'
+  fullPaths: '/' | '/dashboard' | '/medication' | '/smart-bottle'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/medication'
-  id: '__root__' | '/' | '/_app' | '/_app/dashboard' | '/_app/medication'
+  to: '/' | '/dashboard' | '/medication' | '/smart-bottle'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/_app/dashboard'
+    | '/_app/medication'
+    | '/_app/smart-bottle'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -80,6 +95,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/smart-bottle': {
+      id: '/_app/smart-bottle'
+      path: '/smart-bottle'
+      fullPath: '/smart-bottle'
+      preLoaderRoute: typeof AppSmartBottleRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/medication': {
       id: '/_app/medication'
       path: '/medication'
@@ -100,11 +122,13 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppMedicationRoute: typeof AppMedicationRoute
+  AppSmartBottleRoute: typeof AppSmartBottleRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppMedicationRoute: AppMedicationRoute,
+  AppSmartBottleRoute: AppSmartBottleRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
