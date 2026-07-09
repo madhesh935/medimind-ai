@@ -15,15 +15,16 @@ const critical = [
 
 function Alerts() {
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-rose-500 to-orange-500 p-6 text-white shadow-lg sm:p-8">
-        <div className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+    <div className="space-y-8">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-primary px-6 py-8 text-white shadow-card sm:px-8">
         <div className="relative flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur"><AlertTriangle className="h-7 w-7" /></div>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+            <AlertTriangle className="h-[22px] w-[22px]" strokeWidth={2} />
+          </div>
           <div>
-            <div className="text-[10px] uppercase tracking-widest opacity-80">Live monitoring</div>
-            <h1 className="font-display text-3xl font-bold sm:text-4xl">3 alerts need your attention</h1>
-            <p className="mt-1 text-sm text-white/85">Real-time critical & warning events for John Anderson.</p>
+            <div className="text-[13px] font-medium uppercase tracking-wider text-white/70">Live monitoring</div>
+            <h2 className="text-[32px] font-semibold tracking-tight">3 alerts need your attention</h2>
+            <p className="mt-1 text-[15px] text-white/85">Real-time critical & warning events for John Anderson.</p>
           </div>
         </div>
       </div>

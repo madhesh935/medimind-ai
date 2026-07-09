@@ -17,7 +17,7 @@ const severityColor: Record<string, string> = {
 
 function AuditLogs() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold">Audit logs</h1>

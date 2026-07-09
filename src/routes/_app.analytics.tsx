@@ -7,17 +7,15 @@ import {
 } from "recharts";
 import { monthlyAdherence, weeklyAdherence, reminderPie, platformUsage } from "@/lib/mock-data";
 import { StatCard } from "@/components/stat-card";
+import { PageHeader } from "@/components/page-header";
 import { Activity, LineChart as LineIcon, TrendingUp, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_app/analytics")({ component: Analytics });
 
 function Analytics() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold">Analytics</h1>
-        <p className="text-sm text-muted-foreground">Deep insights across adherence, engagement and outcomes.</p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title="Analytics" subtitle="Deep insights across adherence, engagement and outcomes" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard icon={TrendingUp} label="Adherence" value="87%" tone="success" hint="+3% MoM" />

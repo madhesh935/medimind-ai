@@ -42,17 +42,17 @@ export const riskPrediction = Array.from({ length: 14 }, (_, i) => ({
 }));
 
 export const reminderPie = [
-  { name: "Push", value: 45, color: "hsl(220 90% 55%)" },
-  { name: "AI Chat", value: 25, color: "hsl(280 75% 55%)" },
-  { name: "SMS", value: 18, color: "hsl(160 70% 45%)" },
-  { name: "WhatsApp", value: 12, color: "hsl(45 90% 55%)" },
+  { name: "Push", value: 45, color: "#2563EB" },
+  { name: "AI Chat", value: 25, color: "#22C55E" },
+  { name: "SMS", value: 18, color: "#F59E0B" },
+  { name: "WhatsApp", value: 12, color: "#94A3B8" },
 ];
 
 export const medications = [
   { id: 1, name: "Metformin", purpose: "Blood sugar control", dosage: "500mg", schedule: "8:00 AM · 8:00 PM", food: "With meals", sideEffects: ["Nausea", "Digestive discomfort"], warnings: ["Alcohol interaction"], remaining: 24, color: "from-blue-500 to-indigo-600" },
   { id: 2, name: "Lisinopril", purpose: "Blood pressure", dosage: "10mg", schedule: "9:00 AM", food: "Any time", sideEffects: ["Dry cough", "Dizziness"], warnings: ["Potassium supplements"], remaining: 18, color: "from-emerald-500 to-teal-600" },
-  { id: 3, name: "Atorvastatin", purpose: "Cholesterol", dosage: "20mg", schedule: "10:00 PM", food: "With or without food", sideEffects: ["Muscle pain"], warnings: ["Grapefruit"], remaining: 12, color: "from-purple-500 to-fuchsia-600" },
-  { id: 4, name: "Aspirin", purpose: "Cardiovascular protection", dosage: "81mg", schedule: "9:00 AM", food: "With food", sideEffects: ["Stomach upset"], warnings: ["Blood thinners"], remaining: 30, color: "from-rose-500 to-orange-500" },
+  { id: 3, name: "Atorvastatin", purpose: "Cholesterol", dosage: "20mg", schedule: "10:00 PM", food: "With or without food", sideEffects: ["Muscle pain"], warnings: ["Grapefruit"], remaining: 12, color: "from-amber-500 to-amber-600" },
+  { id: 4, name: "Aspirin", purpose: "Cardiovascular protection", dosage: "81mg", schedule: "9:00 AM", food: "With food", sideEffects: ["Stomach upset"], warnings: ["Blood thinners"], remaining: 30, color: "from-slate-500 to-slate-600" },
 ];
 
 export const todaysSchedule = [

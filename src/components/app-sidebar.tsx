@@ -100,30 +100,28 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r border-border/60 [&_[data-slot=sidebar-container]]:transition-[width,left,right] [&_[data-slot=sidebar-container]]:duration-300 [&_[data-slot=sidebar-container]]:ease-out [&_[data-slot=sidebar-gap]]:transition-[width] [&_[data-slot=sidebar-gap]]:duration-300 [&_[data-slot=sidebar-gap]]:ease-out"
+      className="border-r border-sidebar-border bg-sidebar [&_[data-slot=sidebar-container]]:transition-[width,left,right] [&_[data-slot=sidebar-container]]:duration-300 [&_[data-slot=sidebar-container]]:ease-out [&_[data-slot=sidebar-gap]]:transition-[width] [&_[data-slot=sidebar-gap]]:duration-300 [&_[data-slot=sidebar-gap]]:ease-out"
     >
       {/* Logo */}
-      <SidebarHeader className="h-[72px] shrink-0 flex-row items-center gap-3 border-b border-border/50 px-5 py-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-        <Link to="/dashboard" className="flex h-full w-full items-center gap-3 overflow-hidden group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-primary shadow-glow transition-transform duration-300 hover:scale-105">
-            <Activity className="h-5 w-5 text-white" />
+      <SidebarHeader className="mb-6 flex h-20 shrink-0 flex-row items-center gap-3.5 border-b border-sidebar-border px-6 group-data-[collapsible=icon]:mb-0 group-data-[collapsible=icon]:h-20 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+        <Link to="/dashboard" className="flex w-full items-center gap-3.5 overflow-hidden group-data-[collapsible=icon]:w-auto group-data-[collapsible=icon]:justify-center">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary shadow-card">
+            <Activity className="h-[24px] w-[24px] animate-heartbeat text-white" strokeWidth={2} />
           </div>
-          <div className={`flex min-w-0 flex-col leading-tight transition-all duration-300 ${collapsed ? "hidden" : "flex"}`}>
-            <span className="font-display text-base font-bold truncate">MediMind</span>
-            <span className="text-[10px] font-semibold uppercase tracking-[1.2px] text-muted-foreground truncate">
-              AI Health
-            </span>
+          <div className={`flex min-w-0 flex-col gap-0.5 leading-tight transition-all duration-300 ${collapsed ? "hidden" : "flex"}`}>
+            <span className="text-[22px] font-bold tracking-tight truncate">MediMind</span>
+            <span className="text-[13px] font-medium text-muted-foreground truncate">AI Health Platform</span>
           </div>
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="flex flex-col px-4 pt-3 pb-4 group-data-[collapsible=icon]:px-3">
+      <SidebarContent className="flex flex-col gap-1 px-4 pb-6 pt-4 group-data-[collapsible=icon]:px-2.5">
         <TooltipProvider delayDuration={0}>
           {groups.map((items, gi) => (
-            <div
-              key={gi}
-              className="flex flex-col gap-2"
-            >
+            <div key={gi} className="flex flex-col gap-0.5">
+              {gi > 0 && !collapsed && (
+                <div className="mx-2 my-2 h-px bg-border/80" />
+              )}
               {items.map((item) => {
                 const active = isActive(item.url);
                 const btn = (
@@ -131,15 +129,18 @@ export function AppSidebar() {
                     to={item.url}
                     data-active={active}
                     className={[
-                      "group/item relative flex h-12 items-center gap-3 rounded-[14px] px-4 text-[15px] font-medium",
-                      "transition-all duration-300 ease-out",
+                      "group/item relative flex h-[52px] items-center gap-3.5 rounded-xl px-4 text-[15px] font-medium",
+                      "transition-all duration-200 ease-[cubic-bezier(0.2,0.8,0.2,1)]",
                       active
-                        ? "bg-gradient-primary text-white shadow-[0_6px_20px_-6px_rgba(99,102,241,0.55)]"
-                        : "text-foreground/80 hover:bg-muted/60 hover:text-foreground",
-                      collapsed ? "justify-center px-0 w-12 mx-auto" : "",
+                        ? "bg-[#DBEAFE] font-semibold text-primary shadow-[inset_0_0_0_1px_rgba(37,99,235,0.12)]"
+                        : "text-sidebar-foreground/70 hover:bg-[#EFF6FF] hover:text-sidebar-foreground",
+                      collapsed ? "justify-center px-0 w-11 mx-auto" : "",
                     ].join(" ")}
                   >
-                    <item.icon className="h-5 w-5 shrink-0" strokeWidth={2} />
+                    <item.icon
+                      className={["h-[22px] w-[22px] shrink-0", active ? "text-primary" : ""].join(" ")}
+                      strokeWidth={2}
+                    />
                     {!collapsed && <span className="truncate">{item.title}</span>}
                   </Link>
                 );

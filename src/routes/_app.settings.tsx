@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, Smartphone, Radio, Watch } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { currentUser } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/_app/settings")({ component: Settings });
@@ -14,13 +15,10 @@ export const Route = createFileRoute("/_app/settings")({ component: Settings });
 function Settings() {
   const nav = useNavigate();
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">Manage your profile, devices and preferences.</p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader title="Settings" subtitle="Manage your profile, devices and preferences" showMeta={false} />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader><CardTitle>Profile</CardTitle></CardHeader>
           <CardContent className="space-y-4">

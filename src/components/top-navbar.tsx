@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { useRole, roleMeta, type Role } from "@/lib/role-store";
 
 const roleBadgeStyles: Record<Role, string> = {
-  patient: "border-primary/40 bg-primary/10 text-primary",
-  caregiver: "border-emerald-400/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  doctor: "border-purple-400/40 bg-purple-500/10 text-purple-600 dark:text-purple-400",
-  admin: "border-rose-400/40 bg-rose-500/10 text-rose-600 dark:text-rose-400",
+  patient: "border-primary/25 bg-primary/10 text-primary",
+  caregiver: "border-success/25 bg-success/10 text-success",
+  doctor: "border-primary/25 bg-primary/10 text-primary",
+  admin: "border-warning/25 bg-warning/10 text-warning",
 };
 
 export function TopNavbar() {
@@ -26,44 +26,55 @@ export function TopNavbar() {
   }, [dark]);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/70 px-3 backdrop-blur-xl sm:px-6">
-      <SidebarTrigger />
-      <div className="relative hidden max-w-md flex-1 md:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Search medications, patients, insights…" className="h-10 rounded-xl border-border/60 bg-muted/40 pl-10" />
+    <header className="glass sticky top-0 z-30 flex h-20 items-center gap-5 border-b border-border px-5 sm:px-8">
+      <SidebarTrigger className="h-11 w-11 shrink-0 rounded-xl transition-colors hover:bg-foreground/[0.05] [&_svg]:h-[22px] [&_svg]:w-[22px]" />
+
+      <div className="relative hidden min-w-0 flex-1 lg:block" style={{ maxWidth: 640 }}>
+        <Search className="pointer-events-none absolute left-5 top-1/2 h-[22px] w-[22px] -translate-y-1/2 text-muted-foreground" strokeWidth={2} />
+        <Input
+          placeholder="Search medications, reports, prescriptions, patients..."
+          className="h-14 w-full max-w-[640px] rounded-2xl border-border bg-white pl-14 text-[16px] shadow-card placeholder:text-muted-foreground"
+        />
       </div>
-      <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-        <Badge variant="outline" className={`hidden gap-1.5 rounded-full sm:inline-flex ${roleBadgeStyles[role]}`}>
-          <Shield className="h-3 w-3" /> {meta.label}
+
+      <div className="ml-auto flex items-center gap-3">
+        <Badge variant="outline" className={`hidden h-10 gap-2 rounded-full px-4 text-[14px] font-medium sm:inline-flex ${roleBadgeStyles[role]}`}>
+          <Shield className="h-[18px] w-[18px]" strokeWidth={2} />
+          {meta.label}
         </Badge>
-        <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => setDark((d) => !d)}>
-          {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </Button>
-        <Button size="icon" variant="ghost" className="relative rounded-xl">
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive" />
+
+        <div className="hidden h-8 w-px bg-border sm:block" />
+
+        <Button size="icon" variant="ghost" className="h-11 w-11 rounded-xl" onClick={() => setDark((d) => !d)}>
+          {dark ? <Sun className="h-[22px] w-[22px]" strokeWidth={2} /> : <Moon className="h-[22px] w-[22px]" strokeWidth={2} />}
         </Button>
 
-        {/* Current user info */}
-        <div className="ml-1 hidden items-center gap-2.5 rounded-xl border border-border/60 bg-card/60 px-3 py-1.5 sm:flex">
-          <Avatar className="h-7 w-7 shrink-0">
-            <AvatarFallback className="bg-gradient-primary text-[11px] font-semibold text-primary-foreground">
+        <Button size="icon" variant="ghost" className="relative h-11 w-11 rounded-xl">
+          <Bell className="h-[22px] w-[22px]" strokeWidth={2} />
+          <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white" />
+        </Button>
+
+        <div className="hidden h-8 w-px bg-border sm:block" />
+
+        <div className="hidden items-center gap-3.5 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-card sm:flex">
+          <Avatar className="h-11 w-11 shrink-0">
+            <AvatarFallback className="bg-primary text-[14px] font-bold text-primary-foreground">
               {meta.initials}
             </AvatarFallback>
           </Avatar>
           <div className="leading-tight">
-            <div className="text-xs font-semibold truncate max-w-[120px]">{meta.user}</div>
-            <div className="text-[10px] text-muted-foreground">{meta.label}</div>
+            <div className="max-w-[150px] truncate text-[15px] font-semibold">{meta.user}</div>
+            <div className="text-[13px] text-muted-foreground">{meta.label}</div>
           </div>
         </div>
 
         <Button
-          variant="ghost"
-          className="ml-1 flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 px-3 py-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+          variant="destructive"
+          className="hidden h-11 gap-2.5 rounded-xl px-4 sm:flex"
           onClick={() => nav({ to: "/" })}
         >
-          <LogOut className="h-4 w-4" />
-          <span className="hidden text-sm font-medium sm:inline">Logout</span>
+          <LogOut className="h-[20px] w-[20px]" strokeWidth={2} />
+          <span className="text-[14px] font-semibold">Logout</span>
         </Button>
       </div>
     </header>

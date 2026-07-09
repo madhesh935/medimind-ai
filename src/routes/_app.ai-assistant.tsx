@@ -1,53 +1,59 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Bot, Send, Sparkles,
-  Loader2, Copy, Check,
+  Bot, Send, Loader2, Copy, Check, Stethoscope, BarChart3, AlertTriangle, Pill,
+  FileText, Calendar, Shield,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { chatSuggestions } from "@/lib/mock-data";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/page-header";
 import { useRole, roleMeta } from "@/lib/role-store";
 
 export const Route = createFileRoute("/_app/ai-assistant")({ component: AIAssistant });
 
 type Msg = { id: number; role: "user" | "ai"; text: string; card?: "adherence" | "medicine" | "risk" | "highrisk" };
 
+const SUGGESTIONS = [
+  { icon: Stethoscope, label: "Explain my medications", prompt: "Explain my medications", tone: "bg-primary/10 text-primary" },
+  { icon: BarChart3, label: "Generate adherence report", prompt: "Generate adherence report", tone: "bg-success/10 text-success" },
+  { icon: AlertTriangle, label: "Analyze medication interactions", prompt: "Check interactions with Metformin", tone: "bg-warning/10 text-warning" },
+  { icon: Pill, label: "What's my next dose?", prompt: "What's my next dose?", tone: "bg-primary/10 text-primary" },
+];
+
+const QUICK_ACTIONS = [
+  { icon: FileText, label: "Medication Summary" },
+  { icon: Pill, label: "Next Dose" },
+  { icon: Calendar, label: "Today's Schedule" },
+  { icon: Shield, label: "Risk Analysis" },
+];
+
 function replyFor(role: string, q: string): Msg {
   const s = q.toLowerCase();
   const id = Date.now();
-  if (s.includes("adherence") && !s.includes("report"))
+  if (s.includes("adherence") || s.includes("report"))
     return { id, role: "ai", text: `Your adherence this week is **94%** — the highest in the last 30 days. Morning doses: 100%. Evening: 87%.`, card: "adherence" };
-  if (s.includes("report") || s.includes("summarize"))
-    return { id, role: "ai", text: "Here's your weekly health report card:", card: "adherence" };
   if (s.includes("take") && s.includes("today"))
-    return { id, role: "ai", text: "Yes ✅ — you took **Metformin at 8:03 AM** and **Lisinopril at 9:00 AM** today. Your next dose is Metformin at 8:00 PM." };
-  if (s.includes("next dose"))
+    return { id, role: "ai", text: "Yes — you took **Metformin at 8:03 AM** and **Lisinopril at 9:00 AM** today. Your next dose is Metformin at 8:00 PM." };
+  if (s.includes("next dose") || s.includes("next"))
     return { id, role: "ai", text: "Your next dose is **Metformin 500mg** at **8:00 PM** — in 4 hours 12 minutes.", card: "medicine" };
-  if (s.includes("interact") && s.includes("metformin"))
+  if (s.includes("interact") || s.includes("explain"))
     return { id, role: "ai", text: "**Metformin interactions to watch:**\n\n- Alcohol (increases lactic acidosis risk)\n- Contrast dyes (temporary hold advised)\n- Cimetidine (raises Metformin levels)\n\nAlways consult Dr. Patel before adding new medications." };
   if (s.includes("risk"))
     return { id, role: "ai", text: "Your risk score is **18 / 100 (Low)**. Main drivers:\n\n1. Consistent morning routine (+)\n2. Slight drop in evening adherence (−)\n3. Stable blood pressure trend (+)", card: "risk" };
-  if (s.includes("high risk") || s.includes("high-risk"))
-    return { id, role: "ai", text: "There are **12 high-risk patients** this week:", card: "highrisk" };
-  if (s.includes("refill"))
-    return { id, role: "ai", text: "**Refill status:**\n- Metformin: 24 pills (12 days)\n- Lisinopril: 18 pills (18 days)\n- Atorvastatin: 12 pills (12 days) ⚠️\n- Aspirin: 30 pills (30 days)" };
-  if (s.includes("did") && s.includes("john"))
-    return { id, role: "ai", text: "Yes — **John took today's medicines**. Metformin at 8:04 AM, Lisinopril at 9:00 AM." };
   return { id, role: "ai", text: `Great question. Based on ${role === "doctor" ? "patient population data" : "your recent activity"}, everything looks on track. Ask me for a detailed report or specific medication.` };
 }
 
 function AIAssistant() {
   const role = useRole();
   const meta = roleMeta[role];
+  const firstName = meta.user.split(" ")[0];
 
-  const [msgs, setMsgs] = useState<Msg[]>([
-    { id: 1, role: "ai", text: `Hi ${meta.user.split(" ")[0]} 👋 I'm MediMind AI. Ask me about medications, adherence, risk scores, or generate a report.` },
-  ]);
+  const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
-  const [streaming, setStreaming] = useState<string>("");
+  const [streaming, setStreaming] = useState("");
   const [copied, setCopied] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -60,14 +66,12 @@ function AIAssistant() {
 
   const send = (text: string) => {
     if (!text.trim()) return;
-    const userMsg: Msg = { id: Date.now(), role: "user", text };
-    setMsgs((m) => [...m, userMsg]);
+    setMsgs((m) => [...m, { id: Date.now(), role: "user", text }]);
     setInput("");
     setThinking(true);
     setTimeout(() => {
       const r = replyFor(role, text);
       setThinking(false);
-      // stream
       let i = 0;
       const iv = setInterval(() => {
         i += 3;
@@ -82,106 +86,136 @@ function AIAssistant() {
     }, 550);
   };
 
+  const showWelcome = msgs.length === 0 && !thinking && !streaming;
+
   return (
-    <div className="h-[calc(100vh-8rem)]">
-      {/* Chat */}
-      <Card className="flex h-full flex-col overflow-hidden">
-        <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-gradient-to-r from-background to-muted/30 px-4 py-3 sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-ai text-white shadow-glow">
-              <Bot className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="truncate font-display text-base font-bold">MediMind AI Assistant</div>
-              <div className="text-xs text-muted-foreground">Your intelligent health companion</div>
+    <div className="flex h-[calc(100vh-8rem)] flex-col space-y-8">
+      <PageHeader title="AI Assistant" subtitle="Your intelligent health companion" showMeta={false} exportLabel="Generate Report" />
 
-            </div>
-          </div>
-
-        </div>
-
-        <div ref={scrollRef} className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-muted/10 to-background px-3 py-6 sm:px-8">
-          <div className="mx-auto max-w-3xl space-y-6">
-            {msgs.map((m) => (
-              <MessageBubble key={m.id} msg={m} meta={meta} copied={copied === m.id} onCopy={() => { navigator.clipboard.writeText(m.text); setCopied(m.id); setTimeout(() => setCopied(null), 1500); }} />
-            ))}
-            {thinking && (
-              <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-ai text-white"><Bot className="h-4 w-4" /></div>
-                <div className="rounded-2xl border border-border/60 bg-card px-4 py-3 shadow-sm">
-                  <div className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary" style={{ animationDelay: "0ms" }} />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary" style={{ animationDelay: "150ms" }} />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-primary" style={{ animationDelay: "300ms" }} />
-                    <span className="ml-2 text-xs text-muted-foreground">MediMind AI is thinking…</span>
+      <Card className="flex flex-1 flex-col overflow-hidden rounded-2xl border-border shadow-card">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-8 sm:px-10">
+          <div className="mx-auto max-w-3xl">
+            {showWelcome && (
+              <div className="space-y-8">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
+                    <Bot className="h-[22px] w-[22px] text-primary" strokeWidth={2} />
                   </div>
+                  <h2 className="text-[28px] font-semibold tracking-tight">Hi {firstName} 👋</h2>
+                  <p className="mt-2 text-[18px] text-muted-foreground">How can I help today?</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {QUICK_ACTIONS.map((a) => (
+                    <button
+                      key={a.label}
+                      type="button"
+                      onClick={() => send(a.label)}
+                      className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 text-center transition-colors hover:border-primary/30 hover:bg-primary/[0.03]"
+                    >
+                      <a.icon className="h-[22px] w-[22px] text-primary" strokeWidth={2} />
+                      <span className="text-[13px] font-medium">{a.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s.label}
+                      type="button"
+                      onClick={() => send(s.prompt)}
+                      className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5 text-left shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg"
+                    >
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${s.tone}`}>
+                        <s.icon className="h-[22px] w-[22px]" strokeWidth={2} />
+                      </div>
+                      <span className="text-[15px] font-semibold">{s.label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
-            {streaming && (
-              <div className="flex items-start gap-3 animate-in fade-in">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-ai text-white"><Bot className="h-4 w-4" /></div>
-                <div className="rounded-2xl border border-border/60 bg-card px-4 py-3 shadow-sm max-w-[85%]">
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                    {formatText(streaming)}
-                    <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-primary align-middle" />
-                  </div>
-                </div>
-              </div>
-            )}
+
+            <div className="space-y-8">
+              {msgs.map((m) => (
+                <MessageBubble key={m.id} msg={m} meta={meta} copied={copied === m.id} onCopy={() => { navigator.clipboard.writeText(m.text); setCopied(m.id); setTimeout(() => setCopied(null), 1500); }} />
+              ))}
+              {thinking && <TypingIndicator />}
+              {streaming && <StreamingBubble text={streaming} />}
+            </div>
           </div>
         </div>
 
-        {msgs.length <= 1 && (
-          <div className="border-t border-border/60 bg-muted/20 px-3 py-3 sm:px-8">
-            <div className="mx-auto max-w-3xl">
-              <div className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Suggested prompts</div>
-              <div className="flex flex-wrap gap-2">
-                {chatSuggestions.map((s) => (
-                  <button key={s} onClick={() => send(s)} className="group flex items-center gap-1.5 rounded-full border border-border/60 bg-card px-3 py-1.5 text-xs transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-primary">
-                    <Sparkles className="h-3 w-3 opacity-60 group-hover:opacity-100" />{s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="border-t border-border/60 bg-background/80 p-3 backdrop-blur sm:p-4">
-          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border/60 bg-card p-2 shadow-sm focus-within:border-primary/50 focus-within:shadow-glow transition-all">
-            <Input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask anything about your medicines..." className="h-10 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" />
-            <Button type="submit" disabled={!input.trim() || thinking || !!streaming} size="icon" className="rounded-xl bg-gradient-primary shadow-glow">
-              {thinking || streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+        <div className="border-t border-border bg-card/80 p-4 backdrop-blur">
+          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="mx-auto flex max-w-3xl items-center gap-3 rounded-2xl border border-border bg-card px-4 py-2 shadow-card focus-within:border-primary/40">
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask Anything..."
+              className="h-12 flex-1 border-0 bg-transparent px-0 text-[15px] shadow-none focus-visible:ring-0"
+            />
+            <Button type="submit" disabled={!input.trim() || thinking || !!streaming} size="icon" className="rounded-xl shadow-none">
+              {thinking || streaming ? <Loader2 className="h-[22px] w-[22px] animate-spin" strokeWidth={2} /> : <Send className="h-[22px] w-[22px]" strokeWidth={2} />}
             </Button>
           </form>
-          <div className="mt-2 text-center text-[10px] text-muted-foreground">MediMind AI can make mistakes. Always consult your doctor for medical decisions.</div>
+          <p className="mx-auto mt-2 max-w-3xl text-center text-[12px] text-muted-foreground">MediMind AI can make mistakes. Always consult your doctor.</p>
         </div>
       </Card>
     </div>
   );
 }
 
-function MessageBubble({ msg, meta, copied, onCopy }: { msg: Msg; meta: { initials: string; user: string }; copied: boolean; onCopy: () => void }) {
+function TypingIndicator() {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+        <Bot className="h-[22px] w-[22px] text-primary" strokeWidth={2} />
+      </div>
+      <div className="rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
+        <div className="flex items-center gap-1.5">
+          <span className="h-2 w-2 animate-bounce rounded-full bg-primary" style={{ animationDelay: "0ms" }} />
+          <span className="h-2 w-2 animate-bounce rounded-full bg-primary" style={{ animationDelay: "150ms" }} />
+          <span className="h-2 w-2 animate-bounce rounded-full bg-primary" style={{ animationDelay: "300ms" }} />
+          <span className="ml-2 text-[13px] text-muted-foreground">MediMind is typing…</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StreamingBubble({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+        <Bot className="h-[22px] w-[22px] text-primary" strokeWidth={2} />
+      </div>
+      <div className="max-w-[85%] rounded-2xl border border-border bg-card px-4 py-3 shadow-card">
+        <div className="whitespace-pre-wrap text-[15px] leading-relaxed">{formatText(text)}<span className="ml-0.5 inline-block h-4 w-1 animate-pulse bg-primary align-middle" /></div>
+      </div>
+    </div>
+  );
+}
+
+function MessageBubble({ msg, meta, copied, onCopy }: { msg: Msg; meta: { initials: string }; copied: boolean; onCopy: () => void }) {
   const isUser = msg.role === "user";
   return (
-    <div className={`group flex items-start gap-3 animate-in fade-in slide-in-from-bottom-1 ${isUser ? "flex-row-reverse" : ""}`}>
-      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white ${isUser ? "bg-gradient-primary" : "bg-gradient-ai"}`}>
-        {isUser ? <span className="text-xs font-bold">{meta.initials}</span> : <Bot className="h-4 w-4" />}
+    <div className={`group flex items-start gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${isUser ? "bg-primary text-white" : "bg-primary/10 text-primary"}`}>
+        {isUser ? <span className="text-[13px] font-bold">{meta.initials}</span> : <Bot className="h-[22px] w-[22px]" strokeWidth={2} />}
       </div>
-      <div className={`min-w-0 max-w-[85%] ${isUser ? "items-end" : ""}`}>
-        <div className={`rounded-2xl px-4 py-3 shadow-sm ${isUser ? "bg-gradient-primary text-primary-foreground" : "border border-border/60 bg-card"}`}>
-          <div className="whitespace-pre-wrap text-sm leading-relaxed">{formatText(msg.text)}</div>
+      <div className="min-w-0 max-w-[85%]">
+        <div className={`rounded-2xl px-4 py-3 shadow-card ${isUser ? "bg-primary text-primary-foreground" : "border border-border bg-card"}`}>
+          <div className="whitespace-pre-wrap text-[15px] leading-relaxed">{formatText(msg.text)}</div>
           {msg.card === "adherence" && <ReportCard />}
           {msg.card === "medicine" && <MedicineCard />}
           {msg.card === "risk" && <RiskCard />}
-          {msg.card === "highrisk" && <HighRiskCard />}
         </div>
         {!isUser && (
-          <div className="mt-1 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-            <button onClick={onCopy} className="rounded-md p-1 text-muted-foreground hover:bg-muted">
-              {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
-            </button>
-          </div>
+          <button onClick={onCopy} className="mt-1 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted">
+            {copied ? <Check className="h-4 w-4 text-success" strokeWidth={2} /> : <Copy className="h-4 w-4" strokeWidth={2} />}
+          </button>
         )}
       </div>
     </div>
@@ -197,13 +231,12 @@ function formatText(t: string) {
 
 function ReportCard() {
   return (
-    <div className="mt-3 overflow-hidden rounded-2xl border border-border/60">
-      <div className="bg-gradient-primary p-4 text-primary-foreground">
-        <div className="text-xs uppercase tracking-widest opacity-80">Weekly report</div>
-        <div className="mt-1 font-display text-3xl font-bold">94% adherence</div>
-        <div className="text-xs opacity-80">Nov 4 – Nov 10 · +6% vs previous week</div>
+    <div className="mt-3 overflow-hidden rounded-xl border border-border">
+      <div className="bg-primary/10 p-4">
+        <div className="text-[13px] text-muted-foreground">Weekly report</div>
+        <div className="text-[28px] font-bold">94% adherence</div>
       </div>
-      <div className="grid grid-cols-3 gap-2 bg-card p-3 text-center text-xs">
+      <div className="grid grid-cols-3 gap-2 bg-card p-3 text-center text-[13px]">
         <div><div className="font-bold text-success">28</div><div className="text-muted-foreground">Taken</div></div>
         <div><div className="font-bold text-warning">2</div><div className="text-muted-foreground">Late</div></div>
         <div><div className="font-bold text-destructive">1</div><div className="text-muted-foreground">Missed</div></div>
@@ -211,38 +244,22 @@ function ReportCard() {
     </div>
   );
 }
+
 function MedicineCard() {
   return (
-    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border/60 bg-gradient-to-br from-primary/5 to-transparent p-3">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white"><Sparkles className="h-5 w-5" /></div>
-      <div className="flex-1"><div className="font-semibold text-sm">Metformin 500mg</div><div className="text-xs text-muted-foreground">With meals · 8:00 PM</div></div>
-      <Badge className="rounded-full bg-primary/15 text-primary">In 4h</Badge>
+    <div className="mt-3 flex items-center gap-3 rounded-xl border border-border bg-card p-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10"><Pill className="h-[22px] w-[22px] text-primary" strokeWidth={2} /></div>
+      <div className="flex-1"><div className="font-semibold text-[15px]">Metformin 500mg</div><div className="text-[13px] text-muted-foreground">With meals · 8:00 PM</div></div>
+      <Badge className="rounded-full bg-primary/10 text-primary">In 4h</Badge>
     </div>
   );
 }
+
 function RiskCard() {
   return (
-    <div className="mt-3 rounded-2xl border border-border/60 p-4">
-      <div className="mb-2 flex items-center justify-between text-xs"><span className="font-semibold">Risk score</span><Badge className="rounded-full bg-success/15 text-success">Low</Badge></div>
-      <div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full w-[18%] rounded-full bg-gradient-to-r from-success to-primary" /></div>
-      <div className="mt-2 flex justify-between text-[10px] text-muted-foreground"><span>0</span><span>18 / 100</span><span>100</span></div>
-    </div>
-  );
-}
-function HighRiskCard() {
-  const items = [
-    { n: "Emma Wilson", s: "68%", r: "High" },
-    { n: "Robert Kim", s: "61%", r: "High" },
-    { n: "James Carter", s: "82%", r: "Medium" },
-  ];
-  return (
-    <div className="mt-3 space-y-1.5">
-      {items.map((i) => (
-        <div key={i.n} className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-2.5">
-          <div className="flex items-center gap-2"><div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary text-white text-xs font-bold">{i.n.split(" ").map((p) => p[0]).join("")}</div><div className="text-sm font-semibold">{i.n}</div></div>
-          <div className="flex items-center gap-2"><span className="text-xs text-muted-foreground">{i.s}</span><Badge className="rounded-full bg-destructive/15 text-destructive text-[10px]">{i.r}</Badge></div>
-        </div>
-      ))}
+    <div className="mt-3 rounded-xl border border-border p-4">
+      <div className="mb-2 flex items-center justify-between text-[13px]"><span className="font-semibold">Risk score</span><Badge className="rounded-full bg-success/10 text-success">Low</Badge></div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full w-[18%] rounded-full bg-success" /></div>
     </div>
   );
 }

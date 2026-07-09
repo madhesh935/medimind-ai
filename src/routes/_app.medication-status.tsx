@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/medication-status")({ component: Med
 
 function MedStatus() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="font-display text-3xl font-bold">Medication status</h1>
         <p className="text-sm text-muted-foreground">Live status of John Anderson's medications today.</p>

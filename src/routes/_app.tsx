@@ -13,15 +13,17 @@ function AppLayout() {
   return (
     <SidebarProvider
       style={{
-        "--sidebar-width": "280px",
+        "--sidebar-width": "250px",
         "--sidebar-width-icon": "88px",
       } as React.CSSProperties}
     >
       <AppSidebar />
       <SidebarInset className="min-h-screen bg-gradient-hero">
         <TopNavbar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Outlet />
+        <main className="page-enter flex-1 px-6 py-8 lg:px-10 lg:py-10">
+          <div className="mx-auto w-full max-w-[1280px]">
+            <Outlet />
+          </div>
         </main>
         <FloatingChat />
         <Toaster />

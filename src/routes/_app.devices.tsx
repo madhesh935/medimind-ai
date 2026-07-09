@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_app/devices")({ component: Devices });
 
 function Devices() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="font-display text-3xl font-bold">Devices</h1>
         <p className="text-sm text-muted-foreground">Every Smart Bottle connected to your MediMind hospital.</p>

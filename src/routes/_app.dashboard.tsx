@@ -19,8 +19,49 @@ import {
   doctors, auditLogs,
 } from "@/lib/mock-data";
 import { useRole, roleMeta } from "@/lib/role-store";
+import {
+  HealthScoreWidget, InteractionCheckerWidget, SmartBottleWidget,
+  EmergencyContactWidget, StreakCalendarWidget, VoiceAssistantWidget, WeeklyInsightsWidget,
+} from "@/components/health-widgets";
+import { Section } from "@/components/page-shell";
 
 export const Route = createFileRoute("/_app/dashboard")({ component: Dashboard });
+
+/* ---- shared chart styling (Apple Health inspired, restrained) ---- */
+const CHART = {
+  blue: "#2563EB",
+  blueSoft: "#93C5FD",
+  green: "#22C55E",
+  amber: "#F59E0B",
+  redSoft: "#FCA5A5",
+  grid: "#EEF2F6",
+  axis: "#94A3B8",
+  ring: ["#2563EB", "#22C55E", "#F59E0B", "#94A3B8", "#64748B"],
+};
+const axisProps = {
+  tickLine: false,
+  axisLine: false,
+  tick: { fill: CHART.axis, fontSize: 12 },
+} as const;
+const tooltipStyle = {
+  borderRadius: 12,
+  border: "1px solid #E2E8F0",
+  boxShadow: "0 6px 16px rgba(15,23,42,0.08)",
+  background: "#ffffff",
+  color: "#0F172A",
+  fontSize: 13,
+  padding: "8px 12px",
+} as const;
+
+/** Draws a single highlighted dot on the final data point ("today"). */
+function makeLastDot(length: number, color = CHART.blue) {
+  return (p: any) =>
+    p.index === length - 1 ? (
+      <circle key={p.index} cx={p.cx} cy={p.cy} r={5} fill={color} stroke="#fff" strokeWidth={2.5} />
+    ) : (
+      <g key={p.index} />
+    );
+}
 
 function Dashboard() {
   const role = useRole();
@@ -32,137 +73,161 @@ function Dashboard() {
 
 /* =========================== PATIENT =========================== */
 function PatientDashboard() {
+  const wLen = weeklyAdherence.length;
+  const rLen = riskPrediction.length;
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-primary opacity-95" />
-        <div className="absolute -right-20 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-32 -left-10 h-72 w-72 rounded-full bg-accent/40 blur-3xl" />
-        <div className="relative grid gap-6 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
-          <div>
-            <Badge className="mb-3 rounded-full border border-white/20 bg-white/10 text-white backdrop-blur">
-              <Sparkles className="mr-1 h-3 w-3" /> Personalized for you
-            </Badge>
-            <h1 className="font-display text-4xl font-bold sm:text-5xl">Good morning, John 👋</h1>
-            <p className="mt-2 max-w-xl text-white/80">You're doing great this week. Adherence is up 6% — keep the streak alive.</p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              <Button className="rounded-xl bg-white text-primary hover:bg-white/90"><Pill className="mr-2 h-4 w-4" />Take medicine</Button>
-              <Button asChild className="rounded-xl border border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20">
-                <Link to="/ai-assistant"><Bot className="mr-2 h-4 w-4" />Open AI Assistant</Link>
-              </Button>
-              <Button asChild className="rounded-xl border border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20">
-                <Link to="/reports"><FileText className="mr-2 h-4 w-4" />View report</Link>
-              </Button>
-              <Button className="rounded-xl border border-white/25 bg-red-400/20 text-white backdrop-blur hover:bg-red-400/30">
-                <AlertTriangle className="mr-2 h-4 w-4" />Emergency SOS
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { k: "Adherence", v: `${dashboardStats.adherence}%`, sub: "Today" },
-              { k: "Next dose", v: dashboardStats.nextMedicine.name, sub: dashboardStats.nextMedicine.time },
-              { k: "Risk score", v: dashboardStats.riskScore, sub: "Predicted 7d" },
-              { k: "Pills left", v: dashboardStats.remainingPills, sub: "Metformin" },
-            ].map((s) => (
-              <div key={s.k} className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-                <div className="text-[10px] uppercase tracking-widest text-white/70">{s.k}</div>
-                <div className="mt-1 font-display text-2xl font-bold">{s.v}</div>
-                <div className="text-xs text-white/70">{s.sub}</div>
-              </div>
-            ))}
-          </div>
+    <div className="space-y-10">
+      {/* Hero */}
+      <div className="rounded-2xl border border-primary/10 bg-gradient-hero-blue px-8 py-8 text-white shadow-card lg:px-10">
+        <h1 className="text-[30px] font-semibold leading-tight tracking-tight lg:text-[34px]">
+          Good morning, John 👋
+        </h1>
+        <p className="mt-2 text-[15px] text-white/80">
+          You're doing great this week — adherence improved by 6%.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button className="h-10 rounded-xl bg-white px-4 text-[14px] font-medium text-primary shadow-none hover:bg-white/90">
+            <Pill className="mr-2 h-4 w-4" strokeWidth={2} />Take Medicine
+          </Button>
+          <Button asChild variant="outline" className="h-10 rounded-xl border-white/30 bg-white/10 px-4 text-[14px] font-medium text-white shadow-none hover:bg-white/15">
+            <Link to="/ai-assistant"><Bot className="mr-2 h-4 w-4" strokeWidth={2} />AI Assistant</Link>
+          </Button>
+          <Button asChild variant="outline" className="h-10 rounded-xl border-white/30 bg-transparent px-4 text-[14px] font-medium text-white shadow-none hover:bg-white/10">
+            <Link to="/reports"><FileText className="mr-2 h-4 w-4" strokeWidth={2} />View Report</Link>
+          </Button>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <StatCard icon={Activity} label="Adherence" value={`${dashboardStats.adherence}%`} hint="+6% vs last week" tone="primary" />
-        <StatCard icon={Pill} label="Today's doses" value={`${dashboardStats.todaysDoses}/5`} hint="1 pending" tone="accent" />
-        <StatCard icon={Flame} label="Weekly streak" value={dashboardStats.weeklyStreak} hint="Personal best" tone="warning" />
-        <StatCard icon={XCircle} label="Missed doses" value={dashboardStats.missedDoses} hint="This week" tone="danger" />
-        <StatCard icon={ShieldCheck} label="Risk" value={dashboardStats.riskScore} hint="AI predicted" tone="success" />
-        <StatCard icon={Package} label="Inventory" value={dashboardStats.remainingPills} hint="Pills remaining" tone="primary" />
-      </div>
+      <Section title="Overview" subtitle="Your health at a glance">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <StatCard icon={HeartPulse} label="Adherence" value={`${dashboardStats.adherence}%`} hint="+6% vs last week" tone="success" />
+          <StatCard icon={Pill} label="Today's doses" value={`${dashboardStats.todaysDoses}/5`} hint="1 pending" tone="primary" />
+          <StatCard icon={Flame} label="Weekly streak" value={dashboardStats.weeklyStreak} hint="Personal best" tone="warning" />
+          <StatCard icon={XCircle} label="Missed doses" value={dashboardStats.missedDoses} hint="This week" tone="danger" />
+          <StatCard icon={ShieldCheck} label="Risk" value={dashboardStats.riskScore} hint="AI predicted" tone="success" />
+          <StatCard icon={Package} label="Inventory" value={dashboardStats.remainingPills} hint="Pills remaining" tone="primary" />
+        </div>
+      </Section>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <Section title="Health tools" subtitle="Smart monitoring and insights">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <HealthScoreWidget />
+          <SmartBottleWidget />
+          <InteractionCheckerWidget />
+          <EmergencyContactWidget />
+        </div>
+        <div className="grid gap-5 md:grid-cols-2">
+          <StreakCalendarWidget />
+          <VoiceAssistantWidget />
+        </div>
+        <WeeklyInsightsWidget />
+      </Section>
+
+      <Section title="Charts & schedule" subtitle="Adherence trends and today's plan">
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="rounded-2xl border-border shadow-card lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-semibold">Weekly adherence</CardTitle>
-            <Badge variant="outline" className="rounded-full text-xs">Last 7 days</Badge>
+            <CardTitle className="text-[17px] font-semibold">Weekly adherence</CardTitle>
+            <Badge variant="outline" className="rounded-full border-border text-xs font-medium text-muted-foreground">Last 7 days</Badge>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={weeklyAdherence}>
-                <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(220 90% 55%)" stopOpacity={0.4} />
-                  <stop offset="95%" stopColor="hsl(220 90% 55%)" stopOpacity={0} />
-                </linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={12} />
-                <YAxis tickLine={false} axisLine={false} fontSize={12} domain={[70, 100]} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 8px 24px rgba(0,0,0,.1)" }} />
-                <Area type="monotone" dataKey="adherence" stroke="hsl(220 90% 55%)" strokeWidth={3} fill="url(#g1)" />
-                <Line type="monotone" dataKey="target" stroke="hsl(280 75% 55%)" strokeDasharray="4 4" strokeWidth={2} dot={false} />
-              </AreaChart>
+              <LineChart data={weeklyAdherence} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke={CHART.grid} />
+                <XAxis dataKey="day" {...axisProps} />
+                <YAxis {...axisProps} domain={[70, 100]} />
+                <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: CHART.blueSoft, strokeWidth: 1 }} />
+                <Line
+                  type="monotone"
+                  dataKey="adherence"
+                  stroke={CHART.blue}
+                  strokeWidth={3}
+                  dot={makeLastDot(wLen)}
+                  activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                  isAnimationActive={false}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">Next medication</CardTitle></CardHeader>
+        <Card className="rounded-2xl border-border shadow-card">
+          <CardHeader><CardTitle className="text-[17px] font-semibold">Next medication</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-2xl bg-gradient-primary p-5 text-primary-foreground">
-              <div className="text-xs uppercase tracking-widest opacity-80">Coming up</div>
-              <div className="mt-1 font-display text-2xl font-bold">Metformin 500mg</div>
-              <div className="mt-3 flex items-baseline gap-2">
-                <span className="font-display text-4xl font-bold">08:42</span>
-                <span className="text-sm opacity-80">until dose</span>
+            <div className="rounded-2xl border border-border bg-secondary/40 p-5">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Pill className="h-5 w-5" strokeWidth={2} />
+                </div>
+                <div>
+                  <div className="text-[15px] font-semibold">Metformin 500mg</div>
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-success">
+                    <span className="h-1.5 w-1.5 rounded-full bg-success" /> On schedule
+                  </div>
+                </div>
               </div>
-              <Progress value={62} className="mt-4 bg-white/20" />
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="text-[34px] font-bold leading-none tracking-tight text-primary">08:42</span>
+                <span className="text-sm text-muted-foreground">until dose</span>
+              </div>
+              <Progress value={62} className="mt-4 h-1.5" />
             </div>
-            <Button className="w-full rounded-xl bg-gradient-primary"><Pill className="mr-2 h-4 w-4" /> Mark as taken</Button>
+            <Button className="h-11 w-full rounded-xl bg-primary font-medium shadow-none hover:bg-primary/90">
+              <Pill className="mr-2 h-4 w-4" strokeWidth={2} /> Mark as Taken
+            </Button>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base font-semibold">Today's schedule</CardTitle></CardHeader>
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="border-border shadow-card lg:col-span-2">
+          <CardHeader><CardTitle>Today's schedule</CardTitle></CardHeader>
           <CardContent>
-            <ol className="relative space-y-3 border-l-2 border-border/70 pl-5">
-              {todaysSchedule.map((s, i) => (
-                <li key={i} className="relative">
-                  <span className={`absolute -left-[26px] top-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full ring-4 ring-background ${s.status === "taken" ? "bg-success" : "bg-primary animate-pulse"}`} />
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/30 p-3">
-                    <div>
-                      <div className="text-sm font-semibold">{s.name} <span className="text-xs text-muted-foreground">· {s.dosage}</span></div>
-                      <div className="text-xs text-muted-foreground">{s.time}</div>
+            <ol className="space-y-2.5">
+              {todaysSchedule.map((s, i) => {
+                const done = s.status === "taken";
+                return (
+                  <li key={i} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                    <span className={`flex h-2.5 w-2.5 shrink-0 rounded-full ${done ? "bg-success" : i === todaysSchedule.findIndex((x) => x.status !== "taken") ? "bg-primary" : "bg-muted-foreground/30"}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[14px] font-medium">
+                        {s.name} <span className="text-[13px] font-normal text-muted-foreground">· {s.dosage}</span>
+                      </div>
+                      <div className="text-[13px] text-muted-foreground">{s.time}</div>
                     </div>
-                    <Badge className={`rounded-full ${s.status === "taken" ? "bg-success/15 text-success" : "bg-primary/15 text-primary"}`}>
-                      {s.status === "taken" ? "Taken" : "Upcoming"}
+                    <Badge className={`rounded-full font-medium ${done ? "bg-success/10 text-success" : "bg-primary/10 text-primary"}`}>
+                      {done ? "Taken" : "Upcoming"}
                     </Badge>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ol>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">Reminder channels</CardTitle></CardHeader>
+        <Card className="rounded-2xl border-border shadow-card">
+          <CardHeader><CardTitle className="text-[17px] font-semibold">Reminder channels</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={reminderPie} innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
-                  {reminderPie.map((e, i) => <Cell key={i} fill={e.color} />)}
+                <Pie
+                  data={reminderPie}
+                  innerRadius={62}
+                  outerRadius={84}
+                  paddingAngle={3}
+                  cornerRadius={8}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {reminderPie.map((_, i) => <Cell key={i} fill={CHART.ring[i % CHART.ring.length]} />)}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={tooltipStyle} />
               </PieChart>
             </ResponsiveContainer>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              {reminderPie.map((r) => (
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[13px]">
+              {reminderPie.map((r, i) => (
                 <div key={r.name} className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: r.color }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: CHART.ring[i % CHART.ring.length] }} />
                   <span className="text-muted-foreground">{r.name}</span>
                   <span className="ml-auto font-semibold">{r.value}%</span>
                 </div>
@@ -172,76 +237,93 @@ function PatientDashboard() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base font-semibold">Monthly adherence</CardTitle></CardHeader>
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="rounded-2xl border-border shadow-card lg:col-span-2">
+          <CardHeader><CardTitle className="text-[17px] font-semibold">Monthly adherence</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={monthlyAdherence}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} />
-                <YAxis tickLine={false} axisLine={false} fontSize={11} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "none" }} />
-                <Bar dataKey="taken" stackId="a" fill="hsl(220 90% 55%)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="missed" stackId="a" fill="hsl(0 70% 60% / .5)" radius={[6, 6, 0, 0]} />
+              <BarChart data={monthlyAdherence} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke={CHART.grid} />
+                <XAxis dataKey="month" {...axisProps} />
+                <YAxis {...axisProps} />
+                <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "rgba(37,99,235,0.06)" }} />
+                <Bar dataKey="taken" stackId="a" fill={CHART.blue} radius={[6, 6, 0, 0]} maxBarSize={26} />
+                <Bar dataKey="missed" stackId="a" fill="#E2E8F0" radius={[6, 6, 0, 0]} maxBarSize={26} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">AI health tips</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+        <Card className="rounded-2xl border-border shadow-card">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-[17px] font-semibold">Risk level</CardTitle>
+            <Badge className="rounded-full bg-success/10 font-medium text-success">Low</Badge>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4 rounded-2xl border border-border p-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/10 text-success">
+                <ShieldCheck className="h-6 w-6" strokeWidth={2} />
+              </div>
+              <div>
+                <div className="text-[22px] font-bold leading-tight">Low Risk</div>
+                <div className="text-[13px] text-muted-foreground">AI prediction based on adherence</div>
+              </div>
+            </div>
             {[
-              { t: "Hydrate 15min before Metformin", w: "Improves absorption" },
-              { t: "Try 10min walk after dinner", w: "Better glucose control" },
+              { t: "Hydrate 15 min before Metformin", w: "Improves absorption" },
+              { t: "Try a 10 min walk after dinner", w: "Better glucose control" },
               { t: "Refill Atorvastatin in 5 days", w: "Auto-order available" },
             ].map((tip) => (
-              <div key={tip.t} className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/30 p-3">
-                <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-ai text-white"><Sparkles className="h-4 w-4" /></div>
-                <div><div className="text-sm font-semibold">{tip.t}</div><div className="text-xs text-muted-foreground">{tip.w}</div></div>
+              <div key={tip.t} className="flex items-start gap-3">
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
+                </div>
+                <div><div className="text-[14px] font-medium">{tip.t}</div><div className="text-[13px] text-muted-foreground">{tip.w}</div></div>
               </div>
             ))}
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-5 lg:grid-cols-3">
+        <Card className="rounded-2xl border-border shadow-card lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base font-semibold">Risk prediction (14 days)</CardTitle>
-            <Badge className="rounded-full bg-success/15 text-success">Low risk</Badge>
+            <CardTitle className="text-[17px] font-semibold">Risk prediction (14 days)</CardTitle>
+            <Badge variant="outline" className="rounded-full border-border text-xs font-medium text-muted-foreground">Forecast</Badge>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={riskPrediction}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={11} />
-                <YAxis tickLine={false} axisLine={false} fontSize={11} />
-                <Tooltip contentStyle={{ borderRadius: 12, border: "none" }} />
-                <Line type="monotone" dataKey="risk" stroke="hsl(220 90% 55%)" strokeWidth={3} dot={false} />
-                <Line type="monotone" dataKey="predicted" stroke="hsl(280 75% 55%)" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+              <LineChart data={riskPrediction} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke={CHART.grid} />
+                <XAxis dataKey="day" {...axisProps} />
+                <YAxis {...axisProps} />
+                <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: CHART.blueSoft, strokeWidth: 1 }} />
+                <Line type="monotone" dataKey="risk" stroke={CHART.blue} strokeWidth={3} dot={makeLastDot(rLen)} activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }} isAnimationActive={false} />
+                <Line type="monotone" dataKey="predicted" stroke={CHART.blueSoft} strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">Recent activity</CardTitle></CardHeader>
+        <Card className="rounded-2xl border-border shadow-card">
+          <CardHeader><CardTitle className="text-[17px] font-semibold">Recent activity</CardTitle></CardHeader>
           <CardContent>
-            <ol className="relative space-y-4 border-l border-border/70 pl-5">
+            <ol className="space-y-3.5">
               {activity.slice(0, 5).map((a, i) => (
-                <li key={i} className="relative">
-                  <span className={`absolute -left-[26px] top-1 flex h-3 w-3 rounded-full ring-4 ring-background ${a.tone === "success" ? "bg-success" : a.tone === "danger" ? "bg-destructive" : a.tone === "accent" ? "bg-accent" : "bg-primary"}`} />
-                  <div className="text-sm font-semibold">{a.type}</div>
-                  <div className="text-xs text-muted-foreground">{a.detail}</div>
-                  <div className="text-[11px] text-muted-foreground/80">{a.time}</div>
+                <li key={i} className="flex gap-3">
+                  <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${a.tone === "success" ? "bg-success" : a.tone === "danger" ? "bg-destructive" : a.tone === "warning" ? "bg-warning" : "bg-primary"}`} />
+                  <div className="min-w-0">
+                    <div className="text-[14px] font-medium">{a.type}</div>
+                    <div className="text-[13px] text-muted-foreground">{a.detail}</div>
+                    <div className="text-[12px] text-muted-foreground/70">{a.time}</div>
+                  </div>
                 </li>
               ))}
             </ol>
           </CardContent>
         </Card>
       </div>
+      </Section>
     </div>
   );
 }
@@ -249,11 +331,11 @@ function PatientDashboard() {
 /* =========================== CAREGIVER =========================== */
 function CaregiverDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-lg">
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-700 opacity-95" />
         <div className="absolute -right-20 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative grid gap-6 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative grid gap-5 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <Badge className="mb-3 rounded-full border border-white/20 bg-white/10 text-white backdrop-blur">
               <HeartPulse className="mr-1 h-3 w-3" /> Monitoring
@@ -376,11 +458,11 @@ function CaregiverDashboard() {
 /* =========================== DOCTOR =========================== */
 function DoctorDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-lg">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-fuchsia-700 opacity-95" />
+        <div className="absolute inset-0 bg-gradient-hero-blue" />
         <div className="absolute -right-20 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative grid gap-6 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative grid gap-5 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <Badge className="mb-3 rounded-full border border-white/20 bg-white/10 text-white backdrop-blur">
               <Stethoscope className="mr-1 h-3 w-3" /> Clinical dashboard
@@ -388,7 +470,7 @@ function DoctorDashboard() {
             <h1 className="font-display text-4xl font-bold sm:text-5xl">Welcome, Dr. Patel</h1>
             <p className="mt-2 max-w-xl text-white/85">4 critical alerts today · 12 patients need review · 6 appointments scheduled.</p>
             <div className="mt-6 flex flex-wrap gap-2">
-              <Button asChild className="rounded-xl bg-white text-purple-700 hover:bg-white/90"><Link to="/patients"><Users className="mr-2 h-4 w-4" />View patients</Link></Button>
+              <Button asChild className="rounded-xl bg-white text-primary hover:bg-white/90"><Link to="/patients"><Users className="mr-2 h-4 w-4" />View patients</Link></Button>
               <Button asChild className="rounded-xl border border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20"><Link to="/ai-assistant"><Bot className="mr-2 h-4 w-4" />Open AI Assistant</Link></Button>
               <Button asChild className="rounded-xl border border-white/25 bg-white/10 text-white backdrop-blur hover:bg-white/20"><Link to="/reports"><FileText className="mr-2 h-4 w-4" />Generate report</Link></Button>
             </div>
@@ -455,8 +537,8 @@ function DoctorDashboard() {
                 <XAxis dataKey="month" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "none" }} />
-                <Bar dataKey="taken" fill="hsl(280 75% 55%)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="missed" fill="hsl(0 70% 60% / .5)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="taken" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="missed" fill="#E2E8F0" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -504,11 +586,11 @@ function DoctorDashboard() {
 /* =========================== ADMIN =========================== */
 function AdminDashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-lg">
         <div className="absolute inset-0 bg-gradient-to-br from-rose-600 to-orange-600 opacity-95" />
         <div className="absolute -right-20 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative grid gap-6 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative grid gap-5 p-6 text-white sm:p-8 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <Badge className="mb-3 rounded-full border border-white/20 bg-white/10 text-white backdrop-blur">
               <ServerCog className="mr-1 h-3 w-3" /> Platform control
