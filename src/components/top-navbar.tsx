@@ -79,8 +79,12 @@ export function TopNavbar() {
             <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
               <UserIcon className="mr-2 h-4 w-4" /> Profile
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
+              <Shield className="mr-2 h-4 w-4" /> Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => nav({ to: "/" })} className="rounded-lg text-destructive focus:text-destructive">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
+              <LogOut className="mr-2 h-4 w-4" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
