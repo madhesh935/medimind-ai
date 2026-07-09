@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
-import { Bell, Search, Moon, Sun, ChevronDown, LogOut, User as UserIcon, Shield } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Shield } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useRole, roleMeta, type Role } from "@/lib/role-store";
 
 const roleBadgeStyles: Record<Role, string> = {
@@ -48,46 +44,27 @@ export function TopNavbar() {
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive" />
         </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="ml-1 flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 py-1 pl-1 pr-2 transition-colors hover:bg-muted/50">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">
-                  {meta.initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden text-left leading-tight sm:block">
-                <div className="text-xs font-semibold">{meta.user.split(" ")[0]}</div>
-                <div className="text-[10px] text-muted-foreground">{meta.label}</div>
-              </div>
-              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2">
-            <DropdownMenuLabel>
-              <div className="flex items-center gap-3 rounded-xl bg-gradient-primary p-3 text-primary-foreground">
-                <Avatar className="h-10 w-10 border-2 border-white/30">
-                  <AvatarFallback className="bg-white/20 text-white">{meta.initials}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold">{meta.user}</div>
-                  <div className="truncate text-[11px] opacity-80">{meta.email}</div>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
-              <UserIcon className="mr-2 h-4 w-4" /> Profile
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
-              <Shield className="mr-2 h-4 w-4" /> Settings
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => nav({ to: "/" })} className="rounded-lg text-destructive focus:text-destructive">
-              <LogOut className="mr-2 h-4 w-4" /> Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Current user info */}
+        <div className="ml-1 hidden items-center gap-2.5 rounded-xl border border-border/60 bg-card/60 px-3 py-1.5 sm:flex">
+          <Avatar className="h-7 w-7 shrink-0">
+            <AvatarFallback className="bg-gradient-primary text-[11px] font-semibold text-primary-foreground">
+              {meta.initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="leading-tight">
+            <div className="text-xs font-semibold truncate max-w-[120px]">{meta.user}</div>
+            <div className="text-[10px] text-muted-foreground">{meta.label}</div>
+          </div>
+        </div>
+
+        <Button
+          variant="ghost"
+          className="ml-1 flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 px-3 py-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
+          onClick={() => nav({ to: "/" })}
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden text-sm font-medium sm:inline">Logout</span>
+        </Button>
       </div>
     </header>
   );

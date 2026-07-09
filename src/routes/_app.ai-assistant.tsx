@@ -1,15 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  Bot, Send, Paperclip, FileImage, Sparkles, Search, Plus, Pin, Trash2, Pencil,
-  Loader2, User, Copy, Check, MoreVertical,
+  Bot, Send, Sparkles,
+  Loader2, Copy, Check,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { chatSuggestions, chatHistoryGroups } from "@/lib/mock-data";
+import { chatSuggestions } from "@/lib/mock-data";
 import { useRole, roleMeta } from "@/lib/role-store";
 
 export const Route = createFileRoute("/_app/ai-assistant")({ component: AIAssistant });
@@ -43,8 +41,7 @@ function replyFor(role: string, q: string): Msg {
 function AIAssistant() {
   const role = useRole();
   const meta = roleMeta[role];
-  const [activeId, setActiveId] = useState("t1");
-  const [search, setSearch] = useState("");
+
   const [msgs, setMsgs] = useState<Msg[]>([
     { id: 1, role: "ai", text: `Hi ${meta.user.split(" ")[0]} 👋 I'm MediMind AI. Ask me about medications, adherence, risk scores, or generate a report.` },
   ]);
@@ -59,7 +56,7 @@ function AIAssistant() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs, streaming, thinking]);
 
-  useEffect(() => { inputRef.current?.focus(); }, [activeId]);
+  useEffect(() => { inputRef.current?.focus(); }, []);
 
   const send = (text: string) => {
     if (!text.trim()) return;
@@ -85,55 +82,10 @@ function AIAssistant() {
     }, 550);
   };
 
-  const filteredGroups = chatHistoryGroups.map((g) => ({
-    ...g,
-    items: g.items.filter((i) => i.title.toLowerCase().includes(search.toLowerCase())),
-  })).filter((g) => g.items.length);
-
-  const newChat = () => {
-    setMsgs([{ id: Date.now(), role: "ai", text: `New conversation started. How can I help you, ${meta.user.split(" ")[0]}?` }]);
-    setActiveId(`t${Date.now()}`);
-  };
-
   return (
-    <div className="grid h-[calc(100vh-8rem)] gap-4 lg:grid-cols-[280px_1fr]">
-      {/* Sidebar */}
-      <Card className="hidden flex-col overflow-hidden lg:flex">
-        <div className="border-b border-border/60 p-3">
-          <Button onClick={newChat} className="w-full rounded-xl bg-gradient-primary shadow-glow">
-            <Plus className="mr-2 h-4 w-4" /> New chat
-          </Button>
-          <div className="relative mt-3">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search chats…" className="h-9 rounded-xl pl-9 text-xs" />
-          </div>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="space-y-4 p-3">
-            {chatHistoryGroups[0].items.some((i) => i.pinned) && (
-              <div>
-                <div className="mb-1 flex items-center gap-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  <Pin className="h-3 w-3" /> Pinned
-                </div>
-                {chatHistoryGroups[0].items.filter((i) => i.pinned).map((c) => (
-                  <ChatItem key={c.id} title={c.title} preview={c.preview} active={activeId === c.id} onClick={() => setActiveId(c.id)} />
-                ))}
-              </div>
-            )}
-            {filteredGroups.map((g) => (
-              <div key={g.label}>
-                <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">{g.label}</div>
-                {g.items.map((c) => (
-                  <ChatItem key={c.id} title={c.title} preview={c.preview} active={activeId === c.id} onClick={() => setActiveId(c.id)} />
-                ))}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </Card>
-
+    <div className="h-[calc(100vh-8rem)]">
       {/* Chat */}
-      <Card className="flex flex-col overflow-hidden">
+      <Card className="flex h-full flex-col overflow-hidden">
         <div className="flex items-center justify-between gap-3 border-b border-border/60 bg-gradient-to-r from-background to-muted/30 px-4 py-3 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-ai text-white shadow-glow">
@@ -145,12 +97,7 @@ function AIAssistant() {
 
             </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <Badge className="hidden rounded-full bg-gradient-ai text-white border-0 sm:inline-flex"><Sparkles className="mr-1 h-3 w-3" />Pro</Badge>
-            <Button variant="ghost" size="icon" onClick={newChat} className="rounded-xl"><Plus className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" className="rounded-xl"><Pencil className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" className="rounded-xl text-destructive"><Trash2 className="h-4 w-4" /></Button>
-          </div>
+
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-muted/10 to-background px-3 py-6 sm:px-8">
@@ -202,8 +149,6 @@ function AIAssistant() {
 
         <div className="border-t border-border/60 bg-background/80 p-3 backdrop-blur sm:p-4">
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border/60 bg-card p-2 shadow-sm focus-within:border-primary/50 focus-within:shadow-glow transition-all">
-            <Button type="button" size="icon" variant="ghost" className="rounded-xl" title="Attach file"><Paperclip className="h-4 w-4" /></Button>
-            <Button type="button" size="icon" variant="ghost" className="rounded-xl" title="Upload prescription"><FileImage className="h-4 w-4" /></Button>
             <Input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask anything about your medicines..." className="h-10 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" />
             <Button type="submit" disabled={!input.trim() || thinking || !!streaming} size="icon" className="rounded-xl bg-gradient-primary shadow-glow">
               {thinking || streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -212,18 +157,6 @@ function AIAssistant() {
           <div className="mt-2 text-center text-[10px] text-muted-foreground">MediMind AI can make mistakes. Always consult your doctor for medical decisions.</div>
         </div>
       </Card>
-    </div>
-  );
-}
-
-function ChatItem({ title, preview, active, onClick }: { title: string; preview: string; active: boolean; onClick: () => void }) {
-  return (
-    <div className={`group mb-1 flex cursor-pointer items-start gap-2 rounded-xl border p-2.5 transition-all ${active ? "border-primary/40 bg-primary/5" : "border-transparent hover:border-border/60 hover:bg-muted/40"}`} onClick={onClick}>
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-xs font-semibold">{title}</div>
-        <div className="truncate text-[11px] text-muted-foreground">{preview}</div>
-      </div>
-      <MoreVertical className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-70" />
     </div>
   );
 }

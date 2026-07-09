@@ -30,7 +30,6 @@ const menus: Record<Role, Item[][]> = {
     [
       { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
       { title: "Refill Center", url: "/refill", icon: RefreshCcw },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
   caregiver: [
@@ -48,7 +47,6 @@ const menus: Record<Role, Item[][]> = {
     [
       { title: "Emergency Contacts", url: "/emergency-contacts", icon: PhoneCall },
       { title: "Patient History", url: "/patient-history", icon: History },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
   doctor: [
@@ -67,7 +65,6 @@ const menus: Record<Role, Item[][]> = {
     [
       { title: "Medicine Database", url: "/medicine-database", icon: BookOpen },
       { title: "Clinical Notes", url: "/clinical-notes", icon: NotebookPen },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
   admin: [
@@ -88,7 +85,6 @@ const menus: Record<Role, Item[][]> = {
       { title: "Audit Logs", url: "/audit-logs", icon: ScrollText },
       { title: "Platform Settings", url: "/platform-settings", icon: SlidersHorizontal },
       { title: "System Health", url: "/system-health", icon: ServerCog },
-      { title: "Settings", url: "/settings", icon: Settings },
     ],
   ],
 };
@@ -126,7 +122,7 @@ export function AppSidebar() {
           {groups.map((items, gi) => (
             <div
               key={gi}
-              className={`flex flex-col gap-2 ${gi > 0 ? "mt-5 pt-5 border-t border-[#E5E7EB] dark:border-white/10" : ""}`}
+              className="flex flex-col gap-2"
             >
               {items.map((item) => {
                 const active = isActive(item.url);
