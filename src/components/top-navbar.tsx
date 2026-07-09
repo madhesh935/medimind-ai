@@ -37,9 +37,6 @@ export function TopNavbar() {
         <Input placeholder="Search medications, patients, insights…" className="h-10 rounded-xl border-border/60 bg-muted/40 pl-10" />
       </div>
       <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-        <Badge variant="outline" className="hidden gap-1.5 rounded-full border-success/40 bg-success/10 text-success sm:inline-flex">
-          <Sparkles className="h-3 w-3" /> AI Ready
-        </Badge>
         <Badge variant="outline" className={`hidden gap-1.5 rounded-full sm:inline-flex ${roleBadgeStyles[role]}`}>
           <Shield className="h-3 w-3" /> {meta.label}
         </Badge>
