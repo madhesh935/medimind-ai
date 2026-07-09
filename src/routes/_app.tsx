@@ -11,7 +11,12 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayout() {
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      style={{
+        "--sidebar-width": "280px",
+        "--sidebar-width-icon": "80px",
+      } as React.CSSProperties}
+    >
       <AppSidebar />
       <SidebarInset className="min-h-screen bg-gradient-hero">
         <TopNavbar />
