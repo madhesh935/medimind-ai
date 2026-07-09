@@ -8,16 +8,13 @@ import {
 import type { LucideIcon } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter,
+  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useRole, roleMeta, type Role } from "@/lib/role-store";
+import { useRole, type Role } from "@/lib/role-store";
 
-type Item = { title: string; url: string; icon: LucideIcon; action?: "logout" };
+type Item = { title: string; url: string; icon: LucideIcon };
 type Group = { label: "Overview" | "Insights" | "Tools"; items: Item[] };
-
-const LOGOUT: Item = { title: "Logout", url: "/", icon: LogOut, action: "logout" };
 
 const menus: Record<Role, Group[]> = {
   patient: [
@@ -36,7 +33,6 @@ const menus: Record<Role, Group[]> = {
       { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
       { title: "Refill Center", url: "/refill", icon: RefreshCcw },
       { title: "Settings", url: "/settings", icon: Settings },
-      LOGOUT,
     ]},
   ],
   caregiver: [
@@ -55,7 +51,6 @@ const menus: Record<Role, Group[]> = {
       { title: "Emergency Contacts", url: "/emergency-contacts", icon: PhoneCall },
       { title: "Patient History", url: "/patient-history", icon: History },
       { title: "Settings", url: "/settings", icon: Settings },
-      LOGOUT,
     ]},
   ],
   doctor: [
@@ -75,7 +70,6 @@ const menus: Record<Role, Group[]> = {
       { title: "Medicine Database", url: "/medicine-database", icon: BookOpen },
       { title: "Clinical Notes", url: "/clinical-notes", icon: NotebookPen },
       { title: "Settings", url: "/settings", icon: Settings },
-      LOGOUT,
     ]},
   ],
   admin: [
@@ -97,7 +91,6 @@ const menus: Record<Role, Group[]> = {
       { title: "Platform Settings", url: "/platform-settings", icon: SlidersHorizontal },
       { title: "System Health", url: "/system-health", icon: ServerCog },
       { title: "Settings", url: "/settings", icon: Settings },
-      LOGOUT,
     ]},
   ],
 };
@@ -105,10 +98,8 @@ const menus: Record<Role, Group[]> = {
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const role = useRole();
-  const meta = roleMeta[role];
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const nav = useNavigate();
   const isActive = (u: string) => pathname === u || pathname.startsWith(u + "/");
 
   return (
@@ -130,7 +121,7 @@ export function AppSidebar() {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="gap-1">
+      <SidebarContent className="justify-center gap-1 py-2">
         {menus[role].map((group) => (
           <SidebarGroup key={group.label} className="animate-fade-in">
             <SidebarGroupLabel
@@ -141,34 +132,26 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const active = item.action !== "logout" && isActive(item.url);
-                  const inner = (
-                    <span className="relative flex w-full items-center gap-3">
-                      {active && (
-                        <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-white/90 shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-scale-in" />
-                      )}
-                      <item.icon className={`h-4 w-4 shrink-0 transition-transform duration-200 ${active ? "text-white" : ""} group-hover/menu-item:scale-110`} />
-                      <span
-                        className={`truncate transition-all duration-300 ${collapsed ? "w-0 -translate-x-2 opacity-0" : "w-auto opacity-100"} ${item.action === "logout" ? "text-destructive" : ""}`}
-                      >
-                        {item.title}
-                      </span>
-                    </span>
-                  );
+                  const active = isActive(item.url);
                   return (
                     <SidebarMenuItem key={item.title} className="group/menu-item">
                       <SidebarMenuButton
-                        asChild={item.action !== "logout"}
+                        asChild
                         isActive={active}
                         tooltip={item.title}
-                        className={`transition-all duration-200 hover:bg-muted/70 data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-glow ${item.action === "logout" ? "text-destructive hover:bg-destructive/10 hover:text-destructive" : ""}`}
-                        onClick={
-                          item.action === "logout"
-                            ? () => nav({ to: "/" })
-                            : undefined
-                        }
+                        className="transition-all duration-200 hover:bg-muted/70 data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-glow"
                       >
-                        {item.action === "logout" ? inner : <Link to={item.url}>{inner}</Link>}
+                        <Link to={item.url}>
+                          <span className="relative flex w-full items-center gap-3">
+                            {active && (
+                              <span className="absolute -left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-white/90 shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-scale-in" />
+                            )}
+                            <item.icon className={`h-4 w-4 shrink-0 transition-transform duration-200 ${active ? "text-white" : ""} group-hover/menu-item:scale-110`} />
+                            <span className={`truncate transition-all duration-300 ${collapsed ? "w-0 -translate-x-2 opacity-0" : "w-auto opacity-100"}`}>
+                              {item.title}
+                            </span>
+                          </span>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
@@ -178,38 +161,6 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-
-      <SidebarFooter className="mt-auto gap-2 border-t border-border/60 p-2">
-        <div
-          className={`flex items-center rounded-xl border border-border/60 bg-card/60 transition-all duration-300 ${collapsed ? "h-10 w-10 justify-center border-0 bg-transparent p-0 mx-auto" : "gap-3 p-2.5"}`}
-          title={collapsed ? `${meta.user} · ${meta.label}` : undefined}
-        >
-          <div className="relative shrink-0">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-gradient-primary text-xs font-semibold text-primary-foreground">
-                {meta.initials}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 flex-1 animate-fade-in">
-              <div className="truncate text-xs font-semibold">{meta.user}</div>
-              <div className="truncate text-[10px] text-muted-foreground">{meta.label}</div>
-            </div>
-          )}
-        </div>
-
-        {!collapsed && (
-          <button
-            onClick={() => nav({ to: "/" })}
-            className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-card/40 px-3 py-2 text-xs font-medium text-destructive transition-all duration-200 hover:bg-destructive/10 animate-fade-in"
-          >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
-          </button>
-        )}
-      </SidebarFooter>
-
     </Sidebar>
   );
 }
