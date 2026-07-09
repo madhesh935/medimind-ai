@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppVoiceRouteImport } from './routes/_app.voice'
 import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppScannerRouteImport } from './routes/_app.scanner'
@@ -19,10 +18,7 @@ import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppRefillRouteImport } from './routes/_app.refill'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
-import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
-import { Route as AppClinicianRouteImport } from './routes/_app.clinician'
-import { Route as AppCaregiverRouteImport } from './routes/_app.caregiver'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -32,11 +28,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppVoiceRoute = AppVoiceRouteImport.update({
-  id: '/voice',
-  path: '/voice',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppSmartBottleRoute = AppSmartBottleRouteImport.update({
   id: '/smart-bottle',
@@ -73,33 +64,15 @@ const AppMedicationRoute = AppMedicationRouteImport.update({
   path: '/medication',
   getParentRoute: () => AppRoute,
 } as any)
-const AppInsightsRoute = AppInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
-const AppClinicianRoute = AppClinicianRouteImport.update({
-  id: '/clinician',
-  path: '/clinician',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCaregiverRoute = AppCaregiverRouteImport.update({
-  id: '/caregiver',
-  path: '/caregiver',
-  getParentRoute: () => AppRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/caregiver': typeof AppCaregiverRoute
-  '/clinician': typeof AppClinicianRoute
   '/dashboard': typeof AppDashboardRoute
-  '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
   '/notifications': typeof AppNotificationsRoute
   '/refill': typeof AppRefillRoute
@@ -107,14 +80,10 @@ export interface FileRoutesByFullPath {
   '/scanner': typeof AppScannerRoute
   '/settings': typeof AppSettingsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
-  '/voice': typeof AppVoiceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/caregiver': typeof AppCaregiverRoute
-  '/clinician': typeof AppClinicianRoute
   '/dashboard': typeof AppDashboardRoute
-  '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
   '/notifications': typeof AppNotificationsRoute
   '/refill': typeof AppRefillRoute
@@ -122,16 +91,12 @@ export interface FileRoutesByTo {
   '/scanner': typeof AppScannerRoute
   '/settings': typeof AppSettingsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
-  '/voice': typeof AppVoiceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/_app/caregiver': typeof AppCaregiverRoute
-  '/_app/clinician': typeof AppClinicianRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/insights': typeof AppInsightsRoute
   '/_app/medication': typeof AppMedicationRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/refill': typeof AppRefillRoute
@@ -139,16 +104,12 @@ export interface FileRoutesById {
   '/_app/scanner': typeof AppScannerRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/smart-bottle': typeof AppSmartBottleRoute
-  '/_app/voice': typeof AppVoiceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/caregiver'
-    | '/clinician'
     | '/dashboard'
-    | '/insights'
     | '/medication'
     | '/notifications'
     | '/refill'
@@ -156,14 +117,10 @@ export interface FileRouteTypes {
     | '/scanner'
     | '/settings'
     | '/smart-bottle'
-    | '/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/caregiver'
-    | '/clinician'
     | '/dashboard'
-    | '/insights'
     | '/medication'
     | '/notifications'
     | '/refill'
@@ -171,15 +128,11 @@ export interface FileRouteTypes {
     | '/scanner'
     | '/settings'
     | '/smart-bottle'
-    | '/voice'
   id:
     | '__root__'
     | '/'
     | '/_app'
-    | '/_app/caregiver'
-    | '/_app/clinician'
     | '/_app/dashboard'
-    | '/_app/insights'
     | '/_app/medication'
     | '/_app/notifications'
     | '/_app/refill'
@@ -187,7 +140,6 @@ export interface FileRouteTypes {
     | '/_app/scanner'
     | '/_app/settings'
     | '/_app/smart-bottle'
-    | '/_app/voice'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,13 +162,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_app/voice': {
-      id: '/_app/voice'
-      path: '/voice'
-      fullPath: '/voice'
-      preLoaderRoute: typeof AppVoiceRouteImport
-      parentRoute: typeof AppRoute
     }
     '/_app/smart-bottle': {
       id: '/_app/smart-bottle'
@@ -267,13 +212,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMedicationRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/insights': {
-      id: '/_app/insights'
-      path: '/insights'
-      fullPath: '/insights'
-      preLoaderRoute: typeof AppInsightsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -281,28 +219,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/clinician': {
-      id: '/_app/clinician'
-      path: '/clinician'
-      fullPath: '/clinician'
-      preLoaderRoute: typeof AppClinicianRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/caregiver': {
-      id: '/_app/caregiver'
-      path: '/caregiver'
-      fullPath: '/caregiver'
-      preLoaderRoute: typeof AppCaregiverRouteImport
-      parentRoute: typeof AppRoute
-    }
   }
 }
 
 interface AppRouteChildren {
-  AppCaregiverRoute: typeof AppCaregiverRoute
-  AppClinicianRoute: typeof AppClinicianRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppInsightsRoute: typeof AppInsightsRoute
   AppMedicationRoute: typeof AppMedicationRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppRefillRoute: typeof AppRefillRoute
@@ -310,14 +231,10 @@ interface AppRouteChildren {
   AppScannerRoute: typeof AppScannerRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSmartBottleRoute: typeof AppSmartBottleRoute
-  AppVoiceRoute: typeof AppVoiceRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppCaregiverRoute: AppCaregiverRoute,
-  AppClinicianRoute: AppClinicianRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppInsightsRoute: AppInsightsRoute,
   AppMedicationRoute: AppMedicationRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppRefillRoute: AppRefillRoute,
@@ -325,7 +242,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppScannerRoute: AppScannerRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSmartBottleRoute: AppSmartBottleRoute,
-  AppVoiceRoute: AppVoiceRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
