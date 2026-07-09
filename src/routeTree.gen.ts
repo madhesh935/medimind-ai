@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppVoiceRouteImport } from './routes/_app.voice'
 import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
+import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
 import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
@@ -42,6 +43,11 @@ const AppSmartBottleRoute = AppSmartBottleRouteImport.update({
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMedicationRoute = AppMedicationRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
+  '/notifications': typeof AppNotificationsRoute
   '/reports': typeof AppReportsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
   '/voice': typeof AppVoiceRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
+  '/notifications': typeof AppNotificationsRoute
   '/reports': typeof AppReportsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
   '/voice': typeof AppVoiceRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/insights': typeof AppInsightsRoute
   '/_app/medication': typeof AppMedicationRoute
+  '/_app/notifications': typeof AppNotificationsRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/smart-bottle': typeof AppSmartBottleRoute
   '/_app/voice': typeof AppVoiceRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/insights'
     | '/medication'
+    | '/notifications'
     | '/reports'
     | '/smart-bottle'
     | '/voice'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/insights'
     | '/medication'
+    | '/notifications'
     | '/reports'
     | '/smart-bottle'
     | '/voice'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/insights'
     | '/_app/medication'
+    | '/_app/notifications'
     | '/_app/reports'
     | '/_app/smart-bottle'
     | '/_app/voice'
@@ -184,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/medication': {
       id: '/_app/medication'
       path: '/medication'
@@ -228,6 +247,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppInsightsRoute: typeof AppInsightsRoute
   AppMedicationRoute: typeof AppMedicationRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSmartBottleRoute: typeof AppSmartBottleRoute
   AppVoiceRoute: typeof AppVoiceRoute
@@ -239,6 +259,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppInsightsRoute: AppInsightsRoute,
   AppMedicationRoute: AppMedicationRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppReportsRoute: AppReportsRoute,
   AppSmartBottleRoute: AppSmartBottleRoute,
   AppVoiceRoute: AppVoiceRoute,
