@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppVoiceRouteImport } from './routes/_app.voice'
 import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
+import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppScannerRouteImport } from './routes/_app.scanner'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppRefillRouteImport } from './routes/_app.refill'
@@ -40,6 +41,11 @@ const AppVoiceRoute = AppVoiceRouteImport.update({
 const AppSmartBottleRoute = AppSmartBottleRouteImport.update({
   id: '/smart-bottle',
   path: '/smart-bottle',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
 const AppScannerRoute = AppScannerRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/refill': typeof AppRefillRoute
   '/reports': typeof AppReportsRoute
   '/scanner': typeof AppScannerRoute
+  '/settings': typeof AppSettingsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
   '/voice': typeof AppVoiceRoute
 }
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/refill': typeof AppRefillRoute
   '/reports': typeof AppReportsRoute
   '/scanner': typeof AppScannerRoute
+  '/settings': typeof AppSettingsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
   '/voice': typeof AppVoiceRoute
 }
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/_app/refill': typeof AppRefillRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/scanner': typeof AppScannerRoute
+  '/_app/settings': typeof AppSettingsRoute
   '/_app/smart-bottle': typeof AppSmartBottleRoute
   '/_app/voice': typeof AppVoiceRoute
 }
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/refill'
     | '/reports'
     | '/scanner'
+    | '/settings'
     | '/smart-bottle'
     | '/voice'
   fileRoutesByTo: FileRoutesByTo
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/refill'
     | '/reports'
     | '/scanner'
+    | '/settings'
     | '/smart-bottle'
     | '/voice'
   id:
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/_app/refill'
     | '/_app/reports'
     | '/_app/scanner'
+    | '/_app/settings'
     | '/_app/smart-bottle'
     | '/_app/voice'
   fileRoutesById: FileRoutesById
@@ -211,6 +223,13 @@ declare module '@tanstack/react-router' {
       path: '/smart-bottle'
       fullPath: '/smart-bottle'
       preLoaderRoute: typeof AppSmartBottleRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/scanner': {
@@ -289,6 +308,7 @@ interface AppRouteChildren {
   AppRefillRoute: typeof AppRefillRoute
   AppReportsRoute: typeof AppReportsRoute
   AppScannerRoute: typeof AppScannerRoute
+  AppSettingsRoute: typeof AppSettingsRoute
   AppSmartBottleRoute: typeof AppSmartBottleRoute
   AppVoiceRoute: typeof AppVoiceRoute
 }
@@ -303,6 +323,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppRefillRoute: AppRefillRoute,
   AppReportsRoute: AppReportsRoute,
   AppScannerRoute: AppScannerRoute,
+  AppSettingsRoute: AppSettingsRoute,
   AppSmartBottleRoute: AppSmartBottleRoute,
   AppVoiceRoute: AppVoiceRoute,
 }
