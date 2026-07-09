@@ -1,83 +1,92 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  Pill,
-  Radio,
-  Mic,
-  Sparkles,
-  FileBarChart,
-  Stethoscope,
-  HeartPulse,
-  Bell,
-  ScanLine,
-  RefreshCcw,
-  Settings,
-  Activity,
+  LayoutDashboard, Pill, Radio, Bot, FileBarChart, Bell, ScanLine, RefreshCcw,
+  Settings, Activity, Users, Stethoscope, HardDrive, ScrollText, LineChart,
+  HeartPulse, AlertTriangle, ClipboardList,
 } from "lucide-react";
-
+import type { LucideIcon } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter,
 } from "@/components/ui/sidebar";
+import { useRole, type Role } from "@/lib/role-store";
 
-const main = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Medication", url: "/medication", icon: Pill },
-  { title: "Smart Bottle", url: "/smart-bottle", icon: Radio },
-  { title: "Voice Assistant", url: "/voice", icon: Mic },
-  { title: "AI Insights", url: "/insights", icon: Sparkles },
-  { title: "Reports", url: "/reports", icon: FileBarChart },
-];
+type Item = { title: string; url: string; icon: LucideIcon };
 
-const care = [
-  { title: "Clinician", url: "/clinician", icon: Stethoscope },
-  { title: "Caregiver", url: "/caregiver", icon: HeartPulse },
-  { title: "Notifications", url: "/notifications", icon: Bell },
-];
-
-const tools = [
-  { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
-  { title: "Refill Center", url: "/refill", icon: RefreshCcw },
-  { title: "Settings", url: "/settings", icon: Settings },
-];
+const menus: Record<Role, { label: string; items: Item[] }[]> = {
+  patient: [
+    { label: "Overview", items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Medication", url: "/medication", icon: Pill },
+      { title: "Smart Bottle", url: "/smart-bottle", icon: Radio },
+      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+    ]},
+    { label: "Insights", items: [
+      { title: "Reports", url: "/reports", icon: FileBarChart },
+      { title: "Notifications", url: "/notifications", icon: Bell },
+    ]},
+    { label: "Tools", items: [
+      { title: "Prescription Scanner", url: "/scanner", icon: ScanLine },
+      { title: "Refill Center", url: "/refill", icon: RefreshCcw },
+      { title: "Settings", url: "/settings", icon: Settings },
+    ]},
+  ],
+  caregiver: [
+    { label: "Overview", items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Assigned Patients", url: "/patients", icon: HeartPulse },
+      { title: "Medication Status", url: "/medication-status", icon: Pill },
+      { title: "Alerts", url: "/alerts", icon: AlertTriangle },
+    ]},
+    { label: "Insights", items: [
+      { title: "Reports", url: "/reports", icon: FileBarChart },
+      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+      { title: "Notifications", url: "/notifications", icon: Bell },
+    ]},
+    { label: "Tools", items: [
+      { title: "Settings", url: "/settings", icon: Settings },
+    ]},
+  ],
+  doctor: [
+    { label: "Overview", items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Patients", url: "/patients", icon: Users },
+      { title: "Prescriptions", url: "/prescriptions", icon: ClipboardList },
+    ]},
+    { label: "Insights", items: [
+      { title: "Reports", url: "/reports", icon: FileBarChart },
+      { title: "Analytics", url: "/analytics", icon: LineChart },
+      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+    ]},
+    { label: "Tools", items: [
+      { title: "Notifications", url: "/notifications", icon: Bell },
+      { title: "Settings", url: "/settings", icon: Settings },
+    ]},
+  ],
+  admin: [
+    { label: "Overview", items: [
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Users", url: "/users", icon: Users },
+      { title: "Doctors", url: "/doctors", icon: Stethoscope },
+      { title: "Patients", url: "/patients", icon: HeartPulse },
+    ]},
+    { label: "Platform", items: [
+      { title: "Devices", url: "/devices", icon: HardDrive },
+      { title: "Analytics", url: "/analytics", icon: LineChart },
+      { title: "Reports", url: "/reports", icon: FileBarChart },
+      { title: "Audit Logs", url: "/audit-logs", icon: ScrollText },
+    ]},
+    { label: "Tools", items: [
+      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+      { title: "Settings", url: "/settings", icon: Settings },
+    ]},
+  ],
+};
 
 export function AppSidebar() {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const role = useRole();
   const isActive = (u: string) => pathname === u || pathname.startsWith(u + "/");
-
-  const renderGroup = (label: string, items: typeof main) => (
-    <SidebarGroup>
-      <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
-        {label}
-      </SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.url}>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive(item.url)}
-                className="data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-glow"
-              >
-                <Link to={item.url} className="flex items-center gap-3">
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
-  );
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/60">
@@ -96,9 +105,31 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="gap-1">
-        {renderGroup("Overview", main)}
-        {renderGroup("Care Team", care)}
-        {renderGroup("Tools", tools)}
+        {menus[role].map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+              {group.label}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.url}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive(item.url)}
+                      className="data-[active=true]:bg-gradient-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-glow"
+                    >
+                      <Link to={item.url} className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border/60 p-3">
@@ -109,7 +140,7 @@ export function AppSidebar() {
           </div>
           <div className="min-w-0 text-xs">
             <div className="truncate font-semibold">AI Online</div>
-            <div className="truncate text-muted-foreground">GPT · Vision · Voice</div>
+            <div className="truncate text-muted-foreground">GPT · Vision · Care</div>
           </div>
         </div>
       </SidebarFooter>
