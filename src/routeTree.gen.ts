@@ -12,20 +12,28 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppUsersRouteImport } from './routes/_app.users'
+import { Route as AppSystemHealthRouteImport } from './routes/_app.system-health'
 import { Route as AppSmartBottleRouteImport } from './routes/_app.smart-bottle'
 import { Route as AppSettingsRouteImport } from './routes/_app.settings'
 import { Route as AppScannerRouteImport } from './routes/_app.scanner'
 import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppRefillRouteImport } from './routes/_app.refill'
 import { Route as AppPrescriptionsRouteImport } from './routes/_app.prescriptions'
+import { Route as AppPlatformSettingsRouteImport } from './routes/_app.platform-settings'
 import { Route as AppPatientsRouteImport } from './routes/_app.patients'
+import { Route as AppPatientHistoryRouteImport } from './routes/_app.patient-history'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
+import { Route as AppMedicineDatabaseRouteImport } from './routes/_app.medicine-database'
 import { Route as AppMedicationStatusRouteImport } from './routes/_app.medication-status'
+import { Route as AppMedicationCalendarRouteImport } from './routes/_app.medication-calendar'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
+import { Route as AppEmergencyContactsRouteImport } from './routes/_app.emergency-contacts'
 import { Route as AppDoctorsRouteImport } from './routes/_app.doctors'
 import { Route as AppDevicesRouteImport } from './routes/_app.devices'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppClinicalNotesRouteImport } from './routes/_app.clinical-notes'
 import { Route as AppAuditLogsRouteImport } from './routes/_app.audit-logs'
+import { Route as AppAppointmentsRouteImport } from './routes/_app.appointments'
 import { Route as AppAnalyticsRouteImport } from './routes/_app.analytics'
 import { Route as AppAlertsRouteImport } from './routes/_app.alerts'
 import { Route as AppAiAssistantRouteImport } from './routes/_app.ai-assistant'
@@ -42,6 +50,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppUsersRoute = AppUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSystemHealthRoute = AppSystemHealthRouteImport.update({
+  id: '/system-health',
+  path: '/system-health',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSmartBottleRoute = AppSmartBottleRouteImport.update({
@@ -74,9 +87,19 @@ const AppPrescriptionsRoute = AppPrescriptionsRouteImport.update({
   path: '/prescriptions',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPlatformSettingsRoute = AppPlatformSettingsRouteImport.update({
+  id: '/platform-settings',
+  path: '/platform-settings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPatientsRoute = AppPatientsRouteImport.update({
   id: '/patients',
   path: '/patients',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppPatientHistoryRoute = AppPatientHistoryRouteImport.update({
+  id: '/patient-history',
+  path: '/patient-history',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
@@ -84,14 +107,29 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMedicineDatabaseRoute = AppMedicineDatabaseRouteImport.update({
+  id: '/medicine-database',
+  path: '/medicine-database',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMedicationStatusRoute = AppMedicationStatusRouteImport.update({
   id: '/medication-status',
   path: '/medication-status',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMedicationCalendarRoute = AppMedicationCalendarRouteImport.update({
+  id: '/medication-calendar',
+  path: '/medication-calendar',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMedicationRoute = AppMedicationRouteImport.update({
   id: '/medication',
   path: '/medication',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppEmergencyContactsRoute = AppEmergencyContactsRouteImport.update({
+  id: '/emergency-contacts',
+  path: '/emergency-contacts',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDoctorsRoute = AppDoctorsRouteImport.update({
@@ -109,9 +147,19 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClinicalNotesRoute = AppClinicalNotesRouteImport.update({
+  id: '/clinical-notes',
+  path: '/clinical-notes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAuditLogsRoute = AppAuditLogsRouteImport.update({
   id: '/audit-logs',
   path: '/audit-logs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAppointmentsRoute = AppAppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAnalyticsRoute = AppAnalyticsRouteImport.update({
@@ -135,20 +183,28 @@ export interface FileRoutesByFullPath {
   '/ai-assistant': typeof AppAiAssistantRoute
   '/alerts': typeof AppAlertsRoute
   '/analytics': typeof AppAnalyticsRoute
+  '/appointments': typeof AppAppointmentsRoute
   '/audit-logs': typeof AppAuditLogsRoute
+  '/clinical-notes': typeof AppClinicalNotesRoute
   '/dashboard': typeof AppDashboardRoute
   '/devices': typeof AppDevicesRoute
   '/doctors': typeof AppDoctorsRoute
+  '/emergency-contacts': typeof AppEmergencyContactsRoute
   '/medication': typeof AppMedicationRoute
+  '/medication-calendar': typeof AppMedicationCalendarRoute
   '/medication-status': typeof AppMedicationStatusRoute
+  '/medicine-database': typeof AppMedicineDatabaseRoute
   '/notifications': typeof AppNotificationsRoute
+  '/patient-history': typeof AppPatientHistoryRoute
   '/patients': typeof AppPatientsRoute
+  '/platform-settings': typeof AppPlatformSettingsRoute
   '/prescriptions': typeof AppPrescriptionsRoute
   '/refill': typeof AppRefillRoute
   '/reports': typeof AppReportsRoute
   '/scanner': typeof AppScannerRoute
   '/settings': typeof AppSettingsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
+  '/system-health': typeof AppSystemHealthRoute
   '/users': typeof AppUsersRoute
 }
 export interface FileRoutesByTo {
@@ -156,20 +212,28 @@ export interface FileRoutesByTo {
   '/ai-assistant': typeof AppAiAssistantRoute
   '/alerts': typeof AppAlertsRoute
   '/analytics': typeof AppAnalyticsRoute
+  '/appointments': typeof AppAppointmentsRoute
   '/audit-logs': typeof AppAuditLogsRoute
+  '/clinical-notes': typeof AppClinicalNotesRoute
   '/dashboard': typeof AppDashboardRoute
   '/devices': typeof AppDevicesRoute
   '/doctors': typeof AppDoctorsRoute
+  '/emergency-contacts': typeof AppEmergencyContactsRoute
   '/medication': typeof AppMedicationRoute
+  '/medication-calendar': typeof AppMedicationCalendarRoute
   '/medication-status': typeof AppMedicationStatusRoute
+  '/medicine-database': typeof AppMedicineDatabaseRoute
   '/notifications': typeof AppNotificationsRoute
+  '/patient-history': typeof AppPatientHistoryRoute
   '/patients': typeof AppPatientsRoute
+  '/platform-settings': typeof AppPlatformSettingsRoute
   '/prescriptions': typeof AppPrescriptionsRoute
   '/refill': typeof AppRefillRoute
   '/reports': typeof AppReportsRoute
   '/scanner': typeof AppScannerRoute
   '/settings': typeof AppSettingsRoute
   '/smart-bottle': typeof AppSmartBottleRoute
+  '/system-health': typeof AppSystemHealthRoute
   '/users': typeof AppUsersRoute
 }
 export interface FileRoutesById {
@@ -179,20 +243,28 @@ export interface FileRoutesById {
   '/_app/ai-assistant': typeof AppAiAssistantRoute
   '/_app/alerts': typeof AppAlertsRoute
   '/_app/analytics': typeof AppAnalyticsRoute
+  '/_app/appointments': typeof AppAppointmentsRoute
   '/_app/audit-logs': typeof AppAuditLogsRoute
+  '/_app/clinical-notes': typeof AppClinicalNotesRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/devices': typeof AppDevicesRoute
   '/_app/doctors': typeof AppDoctorsRoute
+  '/_app/emergency-contacts': typeof AppEmergencyContactsRoute
   '/_app/medication': typeof AppMedicationRoute
+  '/_app/medication-calendar': typeof AppMedicationCalendarRoute
   '/_app/medication-status': typeof AppMedicationStatusRoute
+  '/_app/medicine-database': typeof AppMedicineDatabaseRoute
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/patient-history': typeof AppPatientHistoryRoute
   '/_app/patients': typeof AppPatientsRoute
+  '/_app/platform-settings': typeof AppPlatformSettingsRoute
   '/_app/prescriptions': typeof AppPrescriptionsRoute
   '/_app/refill': typeof AppRefillRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/scanner': typeof AppScannerRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/smart-bottle': typeof AppSmartBottleRoute
+  '/_app/system-health': typeof AppSystemHealthRoute
   '/_app/users': typeof AppUsersRoute
 }
 export interface FileRouteTypes {
@@ -202,20 +274,28 @@ export interface FileRouteTypes {
     | '/ai-assistant'
     | '/alerts'
     | '/analytics'
+    | '/appointments'
     | '/audit-logs'
+    | '/clinical-notes'
     | '/dashboard'
     | '/devices'
     | '/doctors'
+    | '/emergency-contacts'
     | '/medication'
+    | '/medication-calendar'
     | '/medication-status'
+    | '/medicine-database'
     | '/notifications'
+    | '/patient-history'
     | '/patients'
+    | '/platform-settings'
     | '/prescriptions'
     | '/refill'
     | '/reports'
     | '/scanner'
     | '/settings'
     | '/smart-bottle'
+    | '/system-health'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -223,20 +303,28 @@ export interface FileRouteTypes {
     | '/ai-assistant'
     | '/alerts'
     | '/analytics'
+    | '/appointments'
     | '/audit-logs'
+    | '/clinical-notes'
     | '/dashboard'
     | '/devices'
     | '/doctors'
+    | '/emergency-contacts'
     | '/medication'
+    | '/medication-calendar'
     | '/medication-status'
+    | '/medicine-database'
     | '/notifications'
+    | '/patient-history'
     | '/patients'
+    | '/platform-settings'
     | '/prescriptions'
     | '/refill'
     | '/reports'
     | '/scanner'
     | '/settings'
     | '/smart-bottle'
+    | '/system-health'
     | '/users'
   id:
     | '__root__'
@@ -245,20 +333,28 @@ export interface FileRouteTypes {
     | '/_app/ai-assistant'
     | '/_app/alerts'
     | '/_app/analytics'
+    | '/_app/appointments'
     | '/_app/audit-logs'
+    | '/_app/clinical-notes'
     | '/_app/dashboard'
     | '/_app/devices'
     | '/_app/doctors'
+    | '/_app/emergency-contacts'
     | '/_app/medication'
+    | '/_app/medication-calendar'
     | '/_app/medication-status'
+    | '/_app/medicine-database'
     | '/_app/notifications'
+    | '/_app/patient-history'
     | '/_app/patients'
+    | '/_app/platform-settings'
     | '/_app/prescriptions'
     | '/_app/refill'
     | '/_app/reports'
     | '/_app/scanner'
     | '/_app/settings'
     | '/_app/smart-bottle'
+    | '/_app/system-health'
     | '/_app/users'
   fileRoutesById: FileRoutesById
 }
@@ -288,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/system-health': {
+      id: '/_app/system-health'
+      path: '/system-health'
+      fullPath: '/system-health'
+      preLoaderRoute: typeof AppSystemHealthRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/smart-bottle': {
@@ -332,11 +435,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPrescriptionsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/platform-settings': {
+      id: '/_app/platform-settings'
+      path: '/platform-settings'
+      fullPath: '/platform-settings'
+      preLoaderRoute: typeof AppPlatformSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/patients': {
       id: '/_app/patients'
       path: '/patients'
       fullPath: '/patients'
       preLoaderRoute: typeof AppPatientsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/patient-history': {
+      id: '/_app/patient-history'
+      path: '/patient-history'
+      fullPath: '/patient-history'
+      preLoaderRoute: typeof AppPatientHistoryRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/notifications': {
@@ -346,6 +463,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/medicine-database': {
+      id: '/_app/medicine-database'
+      path: '/medicine-database'
+      fullPath: '/medicine-database'
+      preLoaderRoute: typeof AppMedicineDatabaseRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/medication-status': {
       id: '/_app/medication-status'
       path: '/medication-status'
@@ -353,11 +477,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMedicationStatusRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/medication-calendar': {
+      id: '/_app/medication-calendar'
+      path: '/medication-calendar'
+      fullPath: '/medication-calendar'
+      preLoaderRoute: typeof AppMedicationCalendarRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/medication': {
       id: '/_app/medication'
       path: '/medication'
       fullPath: '/medication'
       preLoaderRoute: typeof AppMedicationRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/emergency-contacts': {
+      id: '/_app/emergency-contacts'
+      path: '/emergency-contacts'
+      fullPath: '/emergency-contacts'
+      preLoaderRoute: typeof AppEmergencyContactsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/doctors': {
@@ -381,11 +519,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/clinical-notes': {
+      id: '/_app/clinical-notes'
+      path: '/clinical-notes'
+      fullPath: '/clinical-notes'
+      preLoaderRoute: typeof AppClinicalNotesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/audit-logs': {
       id: '/_app/audit-logs'
       path: '/audit-logs'
       fullPath: '/audit-logs'
       preLoaderRoute: typeof AppAuditLogsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/appointments': {
+      id: '/_app/appointments'
+      path: '/appointments'
+      fullPath: '/appointments'
+      preLoaderRoute: typeof AppAppointmentsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/analytics': {
@@ -416,20 +568,28 @@ interface AppRouteChildren {
   AppAiAssistantRoute: typeof AppAiAssistantRoute
   AppAlertsRoute: typeof AppAlertsRoute
   AppAnalyticsRoute: typeof AppAnalyticsRoute
+  AppAppointmentsRoute: typeof AppAppointmentsRoute
   AppAuditLogsRoute: typeof AppAuditLogsRoute
+  AppClinicalNotesRoute: typeof AppClinicalNotesRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppDevicesRoute: typeof AppDevicesRoute
   AppDoctorsRoute: typeof AppDoctorsRoute
+  AppEmergencyContactsRoute: typeof AppEmergencyContactsRoute
   AppMedicationRoute: typeof AppMedicationRoute
+  AppMedicationCalendarRoute: typeof AppMedicationCalendarRoute
   AppMedicationStatusRoute: typeof AppMedicationStatusRoute
+  AppMedicineDatabaseRoute: typeof AppMedicineDatabaseRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPatientHistoryRoute: typeof AppPatientHistoryRoute
   AppPatientsRoute: typeof AppPatientsRoute
+  AppPlatformSettingsRoute: typeof AppPlatformSettingsRoute
   AppPrescriptionsRoute: typeof AppPrescriptionsRoute
   AppRefillRoute: typeof AppRefillRoute
   AppReportsRoute: typeof AppReportsRoute
   AppScannerRoute: typeof AppScannerRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSmartBottleRoute: typeof AppSmartBottleRoute
+  AppSystemHealthRoute: typeof AppSystemHealthRoute
   AppUsersRoute: typeof AppUsersRoute
 }
 
@@ -437,20 +597,28 @@ const AppRouteChildren: AppRouteChildren = {
   AppAiAssistantRoute: AppAiAssistantRoute,
   AppAlertsRoute: AppAlertsRoute,
   AppAnalyticsRoute: AppAnalyticsRoute,
+  AppAppointmentsRoute: AppAppointmentsRoute,
   AppAuditLogsRoute: AppAuditLogsRoute,
+  AppClinicalNotesRoute: AppClinicalNotesRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppDevicesRoute: AppDevicesRoute,
   AppDoctorsRoute: AppDoctorsRoute,
+  AppEmergencyContactsRoute: AppEmergencyContactsRoute,
   AppMedicationRoute: AppMedicationRoute,
+  AppMedicationCalendarRoute: AppMedicationCalendarRoute,
   AppMedicationStatusRoute: AppMedicationStatusRoute,
+  AppMedicineDatabaseRoute: AppMedicineDatabaseRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppPatientHistoryRoute: AppPatientHistoryRoute,
   AppPatientsRoute: AppPatientsRoute,
+  AppPlatformSettingsRoute: AppPlatformSettingsRoute,
   AppPrescriptionsRoute: AppPrescriptionsRoute,
   AppRefillRoute: AppRefillRoute,
   AppReportsRoute: AppReportsRoute,
   AppScannerRoute: AppScannerRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSmartBottleRoute: AppSmartBottleRoute,
+  AppSystemHealthRoute: AppSystemHealthRoute,
   AppUsersRoute: AppUsersRoute,
 }
 
