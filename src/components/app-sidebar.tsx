@@ -179,30 +179,10 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
 
-      <SidebarFooter className="gap-2 border-t border-border/60 p-2">
-        {/* AI status */}
-        <div
-          className={`glass flex items-center rounded-xl transition-all duration-300 ${collapsed ? "h-10 w-10 justify-center p-0 mx-auto" : "gap-3 p-3"}`}
-          title="AI Online · GPT-5 · Connected"
-        >
-          <div className="relative flex h-2.5 w-2.5 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-70" />
-            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-          </div>
-          {!collapsed && (
-            <div className="min-w-0 flex-1 text-xs animate-fade-in">
-              <div className="flex items-center gap-1 font-semibold">
-                <Sparkles className="h-3 w-3 text-primary" /> AI Online
-              </div>
-              <div className="truncate text-[10px] text-muted-foreground">GPT-5 · Connected</div>
-            </div>
-          )}
-        </div>
-
-        {/* User profile */}
+      <SidebarFooter className="mt-auto gap-2 border-t border-border/60 p-2">
         <div
           className={`flex items-center rounded-xl border border-border/60 bg-card/60 transition-all duration-300 ${collapsed ? "h-10 w-10 justify-center border-0 bg-transparent p-0 mx-auto" : "gap-3 p-2.5"}`}
-          title={`${meta.user} · ${meta.label} · ${meta.email}`}
+          title={collapsed ? `${meta.user} · ${meta.label}` : undefined}
         >
           <div className="relative shrink-0">
             <Avatar className="h-8 w-8">
@@ -210,18 +190,26 @@ export function AppSidebar() {
                 {meta.initials}
               </AvatarFallback>
             </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-success" />
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1 animate-fade-in">
               <div className="truncate text-xs font-semibold">{meta.user}</div>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success" /> Online · {meta.label}
-              </div>
+              <div className="truncate text-[10px] text-muted-foreground">{meta.label}</div>
             </div>
           )}
         </div>
+
+        {!collapsed && (
+          <button
+            onClick={() => nav({ to: "/" })}
+            className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-card/40 px-3 py-2 text-xs font-medium text-destructive transition-all duration-200 hover:bg-destructive/10 animate-fade-in"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Logout</span>
+          </button>
+        )}
       </SidebarFooter>
+
     </Sidebar>
   );
 }
