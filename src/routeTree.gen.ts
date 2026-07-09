@@ -18,6 +18,7 @@ import { Route as AppMedicationRouteImport } from './routes/_app.medication'
 import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppClinicianRouteImport } from './routes/_app.clinician'
+import { Route as AppCaregiverRouteImport } from './routes/_app.caregiver'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -63,9 +64,15 @@ const AppClinicianRoute = AppClinicianRouteImport.update({
   path: '/clinician',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCaregiverRoute = AppCaregiverRouteImport.update({
+  id: '/caregiver',
+  path: '/caregiver',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/caregiver': typeof AppCaregiverRoute
   '/clinician': typeof AppClinicianRoute
   '/dashboard': typeof AppDashboardRoute
   '/insights': typeof AppInsightsRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/caregiver': typeof AppCaregiverRoute
   '/clinician': typeof AppClinicianRoute
   '/dashboard': typeof AppDashboardRoute
   '/insights': typeof AppInsightsRoute
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/caregiver': typeof AppCaregiverRoute
   '/_app/clinician': typeof AppClinicianRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/insights': typeof AppInsightsRoute
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/caregiver'
     | '/clinician'
     | '/dashboard'
     | '/insights'
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/caregiver'
     | '/clinician'
     | '/dashboard'
     | '/insights'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/caregiver'
     | '/_app/clinician'
     | '/_app/dashboard'
     | '/_app/insights'
@@ -200,10 +212,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClinicianRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/caregiver': {
+      id: '/_app/caregiver'
+      path: '/caregiver'
+      fullPath: '/caregiver'
+      preLoaderRoute: typeof AppCaregiverRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppCaregiverRoute: typeof AppCaregiverRoute
   AppClinicianRoute: typeof AppClinicianRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppInsightsRoute: typeof AppInsightsRoute
@@ -214,6 +234,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCaregiverRoute: AppCaregiverRoute,
   AppClinicianRoute: AppClinicianRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppInsightsRoute: AppInsightsRoute,
