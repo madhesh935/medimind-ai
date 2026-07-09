@@ -8,9 +8,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useRole, setRole, roleMeta, type Role } from "@/lib/role-store";
+import { useRole, roleMeta, type Role } from "@/lib/role-store";
 
 const roleBadgeStyles: Record<Role, string> = {
   patient: "border-primary/40 bg-primary/10 text-primary",
@@ -76,23 +76,15 @@ export function TopNavbar() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Switch role (demo)
-            </DropdownMenuLabel>
-            <DropdownMenuRadioGroup value={role} onValueChange={(v) => setRole(v as Role)}>
-              {(Object.keys(roleMeta) as Role[]).map((r) => (
-                <DropdownMenuRadioItem key={r} value={r} className="rounded-lg">
-                  <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-gradient-primary" />
-                  {roleMeta[r].label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
-              <UserIcon className="mr-2 h-4 w-4" /> Profile & Settings
+              <UserIcon className="mr-2 h-4 w-4" /> Profile
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
+              <Shield className="mr-2 h-4 w-4" /> Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => nav({ to: "/" })} className="rounded-lg text-destructive focus:text-destructive">
-              <LogOut className="mr-2 h-4 w-4" /> Sign out
+              <LogOut className="mr-2 h-4 w-4" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
