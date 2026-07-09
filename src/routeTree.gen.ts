@@ -17,6 +17,7 @@ import { Route as AppReportsRouteImport } from './routes/_app.reports'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
 import { Route as AppInsightsRouteImport } from './routes/_app.insights'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppClinicianRouteImport } from './routes/_app.clinician'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -57,9 +58,15 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClinicianRoute = AppClinicianRouteImport.update({
+  id: '/clinician',
+  path: '/clinician',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/clinician': typeof AppClinicianRoute
   '/dashboard': typeof AppDashboardRoute
   '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/clinician': typeof AppClinicianRoute
   '/dashboard': typeof AppDashboardRoute
   '/insights': typeof AppInsightsRoute
   '/medication': typeof AppMedicationRoute
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/clinician': typeof AppClinicianRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/insights': typeof AppInsightsRoute
   '/_app/medication': typeof AppMedicationRoute
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/clinician'
     | '/dashboard'
     | '/insights'
     | '/medication'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/clinician'
     | '/dashboard'
     | '/insights'
     | '/medication'
@@ -110,6 +121,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/clinician'
     | '/_app/dashboard'
     | '/_app/insights'
     | '/_app/medication'
@@ -181,10 +193,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/clinician': {
+      id: '/_app/clinician'
+      path: '/clinician'
+      fullPath: '/clinician'
+      preLoaderRoute: typeof AppClinicianRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppClinicianRoute: typeof AppClinicianRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppInsightsRoute: typeof AppInsightsRoute
   AppMedicationRoute: typeof AppMedicationRoute
@@ -194,6 +214,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppClinicianRoute: AppClinicianRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppInsightsRoute: AppInsightsRoute,
   AppMedicationRoute: AppMedicationRoute,
