@@ -23,7 +23,13 @@ class Settings(BaseSettings):
     
     # REDIS
     REDIS_URL: str = "redis://localhost:6379/0"
-    
+
+    # AI
+    GEMINI_API_KEY: str = ""
+
+    # File uploads (prescription scanner) — stored on local disk, no cloud storage configured
+    UPLOAD_DIR: str = "uploads/prescriptions"
+
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
     

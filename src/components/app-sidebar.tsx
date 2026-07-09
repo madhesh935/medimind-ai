@@ -1,9 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Pill, Radio, Bot, FileBarChart, Bell, ScanLine, RefreshCcw,
-  Settings, Activity, Users, Stethoscope, HardDrive, ScrollText, LineChart,
-  HeartPulse, AlertTriangle, ClipboardList, Calendar, PhoneCall, History,
-  BookOpen, NotebookPen, SlidersHorizontal, ServerCog,
+  Activity, Users, Stethoscope, HardDrive, ScrollText,
+  HeartPulse, ClipboardList, Calendar, Video,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -20,9 +19,9 @@ const menus: Record<Role, Item[][]> = {
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
       { title: "Medication", url: "/medication", icon: Pill },
       { title: "Smart Bottle", url: "/smart-bottle", icon: Radio },
-      { title: "Medication Calendar", url: "/medication-calendar", icon: Calendar },
     ],
     [
+      { title: "Consult Doctor", url: "/telemedicine", icon: Video },
       { title: "Reports", url: "/reports", icon: FileBarChart },
       { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
       { title: "Notifications", url: "/notifications", icon: Bell },
@@ -32,39 +31,18 @@ const menus: Record<Role, Item[][]> = {
       { title: "Refill Center", url: "/refill", icon: RefreshCcw },
     ],
   ],
-  caregiver: [
-    [
-      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { title: "Assigned Patients", url: "/patients", icon: HeartPulse },
-      { title: "Medication Status", url: "/medication-status", icon: Pill },
-      { title: "Alerts", url: "/alerts", icon: AlertTriangle },
-    ],
-    [
-      { title: "Reports", url: "/reports", icon: FileBarChart },
-      { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
-      { title: "Notifications", url: "/notifications", icon: Bell },
-    ],
-    [
-      { title: "Emergency Contacts", url: "/emergency-contacts", icon: PhoneCall },
-      { title: "Patient History", url: "/patient-history", icon: History },
-    ],
-  ],
   doctor: [
     [
       { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
       { title: "Patients", url: "/patients", icon: Users },
+      { title: "Telemedicine", url: "/telemedicine", icon: Video },
       { title: "Prescriptions", url: "/prescriptions", icon: ClipboardList },
       { title: "Appointments", url: "/appointments", icon: Calendar },
     ],
     [
       { title: "Reports", url: "/reports", icon: FileBarChart },
-      { title: "Analytics", url: "/analytics", icon: LineChart },
       { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
       { title: "Notifications", url: "/notifications", icon: Bell },
-    ],
-    [
-      { title: "Medicine Database", url: "/medicine-database", icon: BookOpen },
-      { title: "Clinical Notes", url: "/clinical-notes", icon: NotebookPen },
     ],
   ],
   admin: [
@@ -76,15 +54,12 @@ const menus: Record<Role, Item[][]> = {
       { title: "Devices", url: "/devices", icon: HardDrive },
     ],
     [
-      { title: "Analytics", url: "/analytics", icon: LineChart },
       { title: "Reports", url: "/reports", icon: FileBarChart },
       { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
       { title: "Notifications", url: "/notifications", icon: Bell },
     ],
     [
       { title: "Audit Logs", url: "/audit-logs", icon: ScrollText },
-      { title: "Platform Settings", url: "/platform-settings", icon: SlidersHorizontal },
-      { title: "System Health", url: "/system-health", icon: ServerCog },
     ],
   ],
 };

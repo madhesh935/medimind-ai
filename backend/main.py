@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.exceptions import add_exception_handlers
 from app.websocket.manager import ws_manager
-from app.routers import auth, profiles, device, ai, medicine, dashboard
+from app.routers import auth, profiles, device, ai, medicine, dashboard, gamification, telemedicine, admin, notifications
 from app.jobs.scheduler import start_scheduler
 
 @asynccontextmanager
@@ -27,6 +27,10 @@ app.include_router(device.router, prefix=f"{settings.API_V1_STR}/devices", tags=
 app.include_router(ai.router, prefix=f"{settings.API_V1_STR}/ai", tags=["ai"])
 app.include_router(medicine.router, prefix=f"{settings.API_V1_STR}/medicines", tags=["medicines"])
 app.include_router(dashboard.router, prefix=f"{settings.API_V1_STR}/dashboard", tags=["dashboard"])
+app.include_router(gamification.router, prefix=f"{settings.API_V1_STR}/gamification", tags=["gamification"])
+app.include_router(telemedicine.router, prefix=f"{settings.API_V1_STR}/telemedicine", tags=["telemedicine"])
+app.include_router(admin.router, prefix=f"{settings.API_V1_STR}/admin", tags=["admin"])
+app.include_router(notifications.router, prefix=f"{settings.API_V1_STR}/notifications", tags=["notifications"])
 
 # Register global exception handlers
 add_exception_handlers(app)
@@ -44,7 +48,9 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
 # CORS must be added before routes to take effect correctly
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173", "*"],
+    # Dev servers in this project run on a sandbox-assigned port (not a fixed 5173/3000),
+    # so allow any localhost/127.0.0.1 origin rather than hardcoding specific ports.
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

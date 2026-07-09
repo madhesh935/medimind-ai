@@ -6,8 +6,11 @@ from typing import Any, List
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_active_user
+from app.core.audit import log_audit_event
 from app.models.user import User
+from app.models.audit import AuditSeverity
 from app.models.device import SmartBottle, BottleEvent
+from app.models.profiles import Patient
 from app.schemas.device import (
     SmartBottleResponse, SmartBottleRegister, SmartBottlePair,
     SmartBottleUpdate, BottleEventCreate, BottleEventResponse
@@ -77,9 +80,37 @@ async def log_device_event(
         raise HTTPException(status_code=404, detail="Device not found")
     event = BottleEvent(device_id=device_id, event_type=event_in.event_type, sensor_data=event_in.sensor_data)
     db.add(event)
+    if event_in.event_type in ("missed", "offline"):
+        await log_audit_event(
+            db,
+            actor_name="System",
+            role="System",
+            action="Smart bottle offline alert" if event_in.event_type == "offline" else "Missed dose alert",
+            target=device_id,
+            severity=AuditSeverity.WARNING,
+            commit=False,
+        )
     await db.commit()
     await db.refresh(event)
     return event
+
+
+@router.get("/me", response_model=SmartBottleResponse)
+async def get_my_device(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+) -> Any:
+    """Patient-scoped lookup — device.py's other endpoints are all keyed by device_id,
+    but the frontend (smart-bottle.tsx) needs to find "my" bottle without knowing its ID."""
+    patient_result = await db.execute(select(Patient).where(Patient.user_id == current_user.id))
+    patient = patient_result.scalars().first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient profile not found")
+    bottle_result = await db.execute(select(SmartBottle).where(SmartBottle.patient_id == patient.id))
+    bottle = bottle_result.scalars().first()
+    if not bottle:
+        raise HTTPException(status_code=404, detail="No smart bottle paired")
+    return bottle
 
 
 @router.get("/{device_id}/events", response_model=List[BottleEventResponse])

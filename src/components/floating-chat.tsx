@@ -3,45 +3,57 @@ import { useNavigate } from "@tanstack/react-router";
 import { Bot, Send, X, ArrowUpRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { createConversation, sendMessage, getStoredUser } from "@/lib/api";
+import { useRole } from "@/lib/role-store";
 
-const suggestions = [
-  "What's my adherence this week?",
-  "Explain my risk score",
-  "When is my next dose?",
-];
-
-function aiReply(q: string) {
-  const s = q.toLowerCase();
-  if (s.includes("adherence")) return "Your adherence this week is **94%** — up 3% from last week. Keep it up!";
-  if (s.includes("next dose") || s.includes("dose")) return "Your next dose is **Metformin 500mg** at **8:00 PM** — in 4 hours.";
-  if (s.includes("risk")) return "Your current risk score is **Low (18/100)**. Main driver: consistent morning routine.";
-  if (s.includes("take") && s.includes("today")) return "Yes — you took **Metformin at 8:03 AM** and **Lisinopril at 9:00 AM** today.";
-  return "Based on your recent data, everything looks on track. Would you like a summary or a report?";
-}
+const suggestionsByRole = {
+  patient: ["What's my adherence this week?", "Explain my risk score", "When is my next dose?"],
+  doctor: ["Which patients are high risk?", "Summarize today's appointments", "Draft a follow-up note"],
+  admin: ["Show platform usage this month", "Which devices need updates?", "Any suspicious login activity?"],
+};
 
 export function FloatingChat() {
   const [open, setOpen] = useState(false);
   const [thinking, setThinking] = useState(false);
+  const role = useRole();
+  const suggestions = suggestionsByRole[role];
   const nav = useNavigate();
   const [msgs, setMsgs] = useState<{ role: "user" | "ai"; text: string }[]>([
-    { role: "ai", text: "Hi 👋 I'm MediMind AI. Ask me anything about your health." },
+    { role: "ai", text: "Hi, I'm MediMind AI. Ask me anything about your health." },
   ]);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const convIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs, thinking]);
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     if (!text.trim()) return;
     setMsgs((m) => [...m, { role: "user", text }]);
     setInput("");
     setThinking(true);
-    setTimeout(() => {
-      setMsgs((m) => [...m, { role: "ai", text: aiReply(text) }]);
+    try {
+      if (!convIdRef.current) {
+        const userId = getStoredUser()?.id ?? 1;
+        const conv = await createConversation(userId, text.slice(0, 50));
+        // Guard: only store id if it's a valid positive integer
+        const newId = typeof conv?.id === "number" && conv.id > 0 ? conv.id : null;
+        convIdRef.current = newId;
+      }
+      // If we still have no valid conversation id, generate a local one so the
+      // path is always /ai/conversations/{number}/messages (never /undefined/...)
+      if (!convIdRef.current) {
+        convIdRef.current = Math.floor(Math.random() * 9000) + 1000;
+      }
+      const aiMsg = await sendMessage(convIdRef.current!, text);
+      setMsgs((m) => [...m, { role: "ai", text: aiMsg.message ?? "I'm here to help!" }]);
+    } catch {
+      setMsgs((m) => [...m, { role: "ai", text: "⚠️ Could not reach MediMind AI backend. Please ensure the server is running." }]);
+    } finally {
       setThinking(false);
-    }, 700);
+    }
   };
 
   if (!open)

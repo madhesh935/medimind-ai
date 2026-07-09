@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export type Role = "patient" | "caregiver" | "doctor" | "admin";
+export type Role = "patient" | "doctor" | "admin";
 
 const KEY = "medimind.role";
 const listeners = new Set<() => void>();
@@ -33,7 +33,6 @@ export function useRole(): Role {
 
 export const roleMeta: Record<Role, { label: string; user: string; initials: string; email: string; subtitle: string; accent: string }> = {
   patient: { label: "Patient", user: "John Anderson", initials: "JA", email: "john@medimind.ai", subtitle: "Type 2 Diabetes · Hypertension", accent: "from-blue-500 to-indigo-600" },
-  caregiver: { label: "Caregiver", user: "Sarah Anderson", initials: "SA", email: "sarah@medimind.ai", subtitle: "Caring for John Anderson", accent: "from-emerald-500 to-teal-600" },
   doctor: { label: "Doctor", user: "Dr. Priya Patel", initials: "PP", email: "p.patel@medimind.ai", subtitle: "Internal Medicine · 138 patients", accent: "from-purple-500 to-fuchsia-600" },
   admin: { label: "Admin", user: "Alex Morgan", initials: "AM", email: "alex@medimind.ai", subtitle: "System Administrator", accent: "from-rose-500 to-orange-500" },
 };

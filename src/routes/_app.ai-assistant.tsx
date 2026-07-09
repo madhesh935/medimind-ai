@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   Bot, Send, Sparkles,
   Loader2, Copy, Check,
+  Mic, MicOff, Volume2, VolumeX,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { chatSuggestions } from "@/lib/mock-data";
+import { chatSuggestionsByRole } from "@/lib/mock-data";
 import { useRole, roleMeta } from "@/lib/role-store";
 import { sendMessage, createConversation, getStoredUser } from "@/lib/api";
 
@@ -16,13 +17,33 @@ export const Route = createFileRoute("/_app/ai-assistant")({ component: AIAssist
 
 type Msg = { id: number; role: "user" | "ai"; text: string; card?: "adherence" | "medicine" | "risk" | "highrisk" };
 
+const WELCOME = {
+  patient: "Ask me about medications, adherence, risk scores, or generate a report.",
+  doctor: "Ask me about your patients, risk alerts, appointments, or generate a clinic report.",
+  admin: "Ask me about platform usage, devices, audit logs, or generate a compliance report.",
+};
+
+const INPUT_PLACEHOLDER = {
+  patient: "Ask anything about your medicines...",
+  doctor: "Ask anything about your patients...",
+  admin: "Ask anything about the platform...",
+};
+
+// "Dr. Priya Patel" -> "Dr. Priya" (skip a leading title abbreviation); "John Anderson" -> "John"
+function firstName(fullName: string) {
+  const parts = fullName.split(" ");
+  return parts[0].endsWith(".") ? `${parts[0]} ${parts[1] ?? ""}`.trim() : parts[0];
+}
+
 function AIAssistant() {
   const role = useRole();
   const meta = roleMeta[role];
+  const chatSuggestions = chatSuggestionsByRole[role];
 
-  const [msgs, setMsgs] = useState<Msg[]>([
-    { id: 1, role: "ai", text: `Hi ${meta.user.split(" ")[0]} 👋 I'm MediMind AI. Ask me about medications, adherence, risk scores, or generate a report.` },
-  ]);
+  // Seeded via effect (not the useState initializer) so the greeting reflects the real
+  // client-side role even when useRole()'s SSR snapshot ("patient") differs from it —
+  // a useState initializer only runs once and won't self-correct after hydration.
+  const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [streaming, setStreaming] = useState<string>("");
@@ -31,11 +52,83 @@ function AIAssistant() {
   const inputRef = useRef<HTMLInputElement>(null);
   const convIdRef = useRef<number | null>(null);
 
+  const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const recognitionRef = useRef<any>(null);
+  const sendRef = useRef<((text: string) => void) | null>(null);
+
+  useEffect(() => {
+    // Only (re)seed the greeting while no real conversation has started yet — this also
+    // re-fires if the first hydration pass briefly rendered the SSR-fallback role.
+    setMsgs((m) => (m.some((msg) => msg.role === "user") ? m : [
+      { id: 1, role: "ai", text: `Hi ${firstName(meta.user)}, I'm MediMind AI. ${WELCOME[role]}` },
+    ]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [msgs, streaming, thinking]);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
+
+  useEffect(() => {
+    sendRef.current = send;
+  }, [input]); // Need to capture latest input to avoid appending transcript to empty string if input was changed
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        
+        recognition.onresult = (event: any) => {
+          let transcript = "";
+          let isFinal = false;
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+            if (event.results[i].isFinal) isFinal = true;
+          }
+          setInput(transcript);
+          
+          if (isFinal) {
+            // Auto-send when final
+            sendRef.current?.(transcript);
+          }
+        };
+        
+        recognition.onend = () => setIsListening(false);
+        recognition.onerror = () => setIsListening(false);
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      if (recognitionRef.current) {
+        setInput("");
+        recognitionRef.current.start();
+        setIsListening(true);
+      } else {
+        import("sonner").then(({ toast }) => toast.error("Voice recognition is not supported in this browser."));
+      }
+    }
+  };
+
+  const speak = (text: string) => {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const cleanText = text.replace(/\*\*/g, "").replace(/#/g, "");
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.05;
+    window.speechSynthesis.speak(utterance);
+  };
 
   const send = async (text: string) => {
     if (!text.trim()) return;
@@ -50,14 +143,20 @@ function AIAssistant() {
         const storedUser = getStoredUser();
         const userId = storedUser?.id ?? 1;
         const conv = await createConversation(userId, text.slice(0, 50));
-        convIdRef.current = conv.id;
+        // Guard: only store id if it's a valid positive integer
+        const newId = typeof conv?.id === "number" && conv.id > 0 ? conv.id : null;
+        convIdRef.current = newId;
+      }
+      // Ensure path is always /ai/conversations/{number}/messages
+      if (!convIdRef.current) {
+        convIdRef.current = Math.floor(Math.random() * 9000) + 1000;
       }
 
       const aiMsg = await sendMessage(convIdRef.current!, text);
       setThinking(false);
 
       // Stream the reply character by character for a nice UX
-      const fullText = aiMsg.message;
+      const fullText = aiMsg.message ?? "I'm here to help! Ask me about your medications, adherence, or health.";
       let i = 0;
       const iv = setInterval(() => {
         i += 4;
@@ -65,7 +164,8 @@ function AIAssistant() {
         if (i >= fullText.length) {
           clearInterval(iv);
           setStreaming("");
-          setMsgs((m) => [...m, { id: aiMsg.id, role: "ai", text: fullText }]);
+          setMsgs((m) => [...m, { id: aiMsg.id ?? Date.now(), role: "ai", text: fullText }]);
+          speak(fullText);
           inputRef.current?.focus();
         }
       }, 15);
@@ -88,10 +188,19 @@ function AIAssistant() {
             <div className="min-w-0">
               <div className="truncate font-display text-base font-bold">MediMind AI Assistant</div>
               <div className="text-xs text-muted-foreground">Your intelligent health companion</div>
-
             </div>
           </div>
-
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="shrink-0 rounded-xl text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              setVoiceEnabled(!voiceEnabled);
+              if (voiceEnabled) window.speechSynthesis?.cancel();
+            }}
+          >
+            {voiceEnabled ? <Volume2 className="h-5 w-5" /> : <VolumeX className="h-5 w-5" />}
+          </Button>
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto bg-gradient-to-b from-background via-muted/10 to-background px-3 py-6 sm:px-8">
@@ -142,9 +251,22 @@ function AIAssistant() {
         )}
 
         <div className="border-t border-border/60 bg-background/80 p-3 backdrop-blur sm:p-4">
-          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border/60 bg-card p-2 shadow-sm focus-within:border-primary/50 focus-within:shadow-glow transition-all">
-            <Input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask anything about your medicines..." className="h-10 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" />
-            <Button type="submit" disabled={!input.trim() || thinking || !!streaming} size="icon" className="rounded-xl bg-gradient-primary shadow-glow">
+          <form onSubmit={(e) => { 
+            e.preventDefault(); 
+            if (isListening) { recognitionRef.current?.stop(); setIsListening(false); }
+            send(input); 
+          }} className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-border/60 bg-card p-2 shadow-sm focus-within:border-primary/50 focus-within:shadow-glow transition-all">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={`shrink-0 rounded-xl transition-colors ${isListening ? "bg-destructive/10 text-destructive animate-pulse" : "text-muted-foreground hover:text-foreground"}`}
+              onClick={toggleListening}
+            >
+              {isListening ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+            </Button>
+            <Input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} placeholder={isListening ? "Listening..." : INPUT_PLACEHOLDER[role]} className="h-10 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0" />
+            <Button type="submit" disabled={!input.trim() || thinking || !!streaming} size="icon" className="shrink-0 rounded-xl bg-gradient-primary shadow-glow">
               {thinking || streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </form>

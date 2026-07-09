@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 
-from app.models.profiles import Patient, Doctor, Caregiver
-from app.schemas.profiles import PatientCreate, PatientUpdate, DoctorCreate, DoctorUpdate, CaregiverCreate, CaregiverUpdate
+from app.models.profiles import Patient, Doctor
+from app.schemas.profiles import PatientCreate, PatientUpdate, DoctorCreate, DoctorUpdate
 
 class ProfileRepository:
     def __init__(self, session: AsyncSession):
@@ -47,16 +47,3 @@ class ProfileRepository:
         await self.session.refresh(db_obj)
         return db_obj
 
-    # --- Caregiver ---
-    async def get_caregiver_by_user_id(self, user_id: int) -> Optional[Caregiver]:
-        result = await self.session.execute(
-            select(Caregiver).options(selectinload(Caregiver.user)).where(Caregiver.user_id == user_id)
-        )
-        return result.scalars().first()
-
-    async def create_caregiver(self, obj_in: CaregiverCreate) -> Caregiver:
-        db_obj = Caregiver(**obj_in.model_dump())
-        self.session.add(db_obj)
-        await self.session.commit()
-        await self.session.refresh(db_obj)
-        return db_obj

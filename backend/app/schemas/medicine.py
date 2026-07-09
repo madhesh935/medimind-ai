@@ -1,4 +1,4 @@
-from typing import Optional, List, Any
+from typing import Optional, Any, List
 from datetime import datetime
 from pydantic import BaseModel
 from app.models.medicine import MedicineStatus, LogStatus
@@ -13,9 +13,10 @@ class MedicineBase(BaseModel):
     end_date: Optional[datetime] = None
     remaining_pills: int = 0
     status: MedicineStatus = MedicineStatus.ACTIVE
+    auto_refill: bool = False
 
 class MedicineCreate(MedicineBase):
-    patient_id: int
+    pass
 
 class MedicineUpdate(BaseModel):
     dosage: Optional[str] = None
@@ -24,6 +25,7 @@ class MedicineUpdate(BaseModel):
     instructions: Optional[str] = None
     remaining_pills: Optional[int] = None
     status: Optional[MedicineStatus] = None
+    auto_refill: Optional[bool] = None
 
 class MedicineResponse(MedicineBase):
     id: int
@@ -56,3 +58,10 @@ class MedicationLogResponse(MedicationLogBase):
 
     class Config:
         from_attributes = True
+
+class PatientDashboardResponse(BaseModel):
+    today_medicines: List[MedicationLogResponse]
+    weekly_adherence: float
+    monthly_adherence: float
+    risk_score: str
+    recent_activity: List[MedicationLogResponse]

@@ -1,5 +1,5 @@
 import enum
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Float, JSON
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Float, JSON, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -29,6 +29,7 @@ class Medicine(Base):
     end_date = Column(DateTime(timezone=True), nullable=True)
     remaining_pills = Column(Integer, default=0)
     status = Column(Enum(MedicineStatus), default=MedicineStatus.ACTIVE)
+    auto_refill = Column(Boolean, default=False)
 
     patient = relationship("Patient", back_populates="medicines")
     logs = relationship("MedicationLog", back_populates="medicine")

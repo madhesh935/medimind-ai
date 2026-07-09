@@ -7,35 +7,53 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useRole, roleMeta, type Role } from "@/lib/role-store";
-import { notifications } from "@/lib/mock-data";
-import { apiLogout } from "@/lib/api";
+import { notificationsByRole } from "@/lib/mock-data";
+import { apiLogout, getNotificationsList, type AppNotification } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const roleBadgeStyles: Record<Role, string> = {
   patient: "border-primary/40 bg-primary/10 text-primary",
-  caregiver: "border-emerald-400/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   doctor: "border-purple-400/40 bg-purple-500/10 text-purple-600 dark:text-purple-400",
   admin: "border-rose-400/40 bg-rose-500/10 text-rose-600 dark:text-rose-400",
 };
 
+const THEME_KEY = "medimind.theme";
+
+function getInitialTheme(): boolean {
+  if (typeof window === "undefined") return false;
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored) return stored === "dark";
+  return window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
+}
+
 export function TopNavbar() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(getInitialTheme);
   const role = useRole();
   const meta = roleMeta[role];
   const nav = useNavigate();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem(THEME_KEY, dark ? "dark" : "light");
   }, [dark]);
 
-  const unreadCount = notifications.length;
+  const [liveNotifications, setLiveNotifications] = useState<AppNotification[] | null>(null);
+
+  useEffect(() => {
+    getNotificationsList()
+      .then(setLiveNotifications)
+      .catch(() => setLiveNotifications(null));
+  }, [role]);
+
+  const notifications = liveNotifications ?? notificationsByRole[role];
+  const unreadCount = notifications.filter((n) => !n.read).length;
   const hasDanger = notifications.some((n) => n.type === "danger");
   const hasWarning = notifications.some((n) => n.type === "warning");
-  const badgeColor = hasDanger 
-    ? "bg-destructive text-destructive-foreground" 
-    : hasWarning 
-    ? "bg-amber-500 text-white" 
-    : "bg-blue-500 text-white";
+  const badgeColor = hasDanger
+    ? "bg-destructive text-destructive-foreground"
+    : hasWarning
+    ? "bg-warning text-warning-foreground"
+    : "bg-primary text-primary-foreground";
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/70 px-3 backdrop-blur-xl sm:px-6">
@@ -51,7 +69,7 @@ export function TopNavbar() {
         <Button size="icon" variant="ghost" className="rounded-xl" onClick={() => setDark((d) => !d)}>
           {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
-        <Button size="icon" variant="ghost" className="relative rounded-xl">
+        <Button size="icon" variant="ghost" className="relative rounded-xl" onClick={() => nav({ to: "/notifications" })}>
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <Badge className={cn("absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] font-bold border-0 shadow-sm", badgeColor)}>

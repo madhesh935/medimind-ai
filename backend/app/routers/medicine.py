@@ -1,18 +1,25 @@
-from fastapi import APIRouter, Depends, HTTPException
+import uuid
+from pathlib import Path
+
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
 from typing import Any, List, Optional
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.dependencies import get_current_active_user
+from app.core.audit import log_audit_event
 from app.models.user import User, RoleEnum
 from app.models.profiles import Patient
 from app.models.medicine import Medicine, MedicationLog, MedicineStatus, LogStatus
+from app.models.audit import AuditSeverity
 from app.schemas.medicine import (
     MedicineResponse, MedicineCreate, MedicineUpdate,
     MedicationLogResponse, MedicationLogUpdate
 )
+from app.services.ai_service import ai_service
 
 router = APIRouter()
 
@@ -44,8 +51,21 @@ async def create_medicine(
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ) -> Any:
-    db_med = Medicine(**med_in.model_dump())
+    patient_id = await _get_patient_id(db, current_user.id)
+    if patient_id is None:
+        raise HTTPException(status_code=404, detail="Patient profile not found")
+    db_med = Medicine(**med_in.model_dump(), patient_id=patient_id)
     db.add(db_med)
+    await log_audit_event(
+        db,
+        actor_name=current_user.name,
+        role=current_user.role.value.capitalize(),
+        action="Added medication",
+        target=med_in.medicine_name,
+        severity=AuditSeverity.SUCCESS,
+        actor_user_id=current_user.id,
+        commit=False,
+    )
     await db.commit()
     await db.refresh(db_med)
     return db_med
@@ -93,6 +113,30 @@ async def get_todays_schedule(
     return list(result.scalars().all())
 
 
+@router.get("/logs", response_model=List[MedicationLogResponse])
+async def get_logs_range(
+    start: datetime,
+    end: datetime,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+) -> Any:
+    """Generalizes the today-only query for the medication calendar (real month-range
+    day-status instead of the previous `day % 7` fabrication)."""
+    if current_user.role != RoleEnum.PATIENT:
+        return []
+    patient_id = await _get_patient_id(db, current_user.id)
+    if patient_id is None:
+        return []
+    result = await db.execute(
+        select(MedicationLog).where(
+            MedicationLog.patient_id == patient_id,
+            MedicationLog.scheduled_time >= start,
+            MedicationLog.scheduled_time < end,
+        ).order_by(MedicationLog.scheduled_time.asc())
+    )
+    return list(result.scalars().all())
+
+
 @router.put("/logs/{log_id}", response_model=MedicationLogResponse)
 async def update_log(
     log_id: int,
@@ -110,3 +154,23 @@ async def update_log(
     await db.commit()
     await db.refresh(log)
     return log
+
+
+@router.post("/scan")
+async def scan_prescription(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_active_user),
+) -> Any:
+    """Extracts medication fields from an uploaded prescription image via Claude vision.
+    Does not save anything — the frontend reviews the extracted fields, then calls the
+    existing create/update-medicine endpoints to persist."""
+    image_bytes = await file.read()
+
+    upload_dir = Path(settings.UPLOAD_DIR)
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    suffix = Path(file.filename or "").suffix or ".jpg"
+    saved_path = upload_dir / f"{uuid.uuid4().hex}{suffix}"
+    saved_path.write_bytes(image_bytes)
+
+    extracted = ai_service.extract_prescription_fields(image_bytes, file.content_type or "image/jpeg")
+    return extracted

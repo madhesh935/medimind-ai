@@ -8,7 +8,6 @@ from app.core.database import Base
 class RoleEnum(str, enum.Enum):
     ADMIN = "admin"
     DOCTOR = "doctor"
-    CAREGIVER = "caregiver"
     PATIENT = "patient"
 
 class User(Base):
@@ -27,6 +26,5 @@ class User(Base):
 
     patient = relationship("Patient", back_populates="user", uselist=False)
     doctor = relationship("Doctor", back_populates="user", uselist=False)
-    caregiver = relationship("Caregiver", back_populates="user", uselist=False)
     notifications = relationship("Notification", back_populates="user")
     ai_conversations = relationship("AIConversation", back_populates="user")
