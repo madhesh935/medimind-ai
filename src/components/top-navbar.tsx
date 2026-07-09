@@ -76,20 +76,8 @@ export function TopNavbar() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Switch role (demo)
-            </DropdownMenuLabel>
-            <DropdownMenuRadioGroup value={role} onValueChange={(v) => setRole(v as Role)}>
-              {(Object.keys(roleMeta) as Role[]).map((r) => (
-                <DropdownMenuRadioItem key={r} value={r} className="rounded-lg">
-                  <span className="mr-2 inline-flex h-2 w-2 rounded-full bg-gradient-primary" />
-                  {roleMeta[r].label}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => nav({ to: "/settings" })} className="rounded-lg">
-              <UserIcon className="mr-2 h-4 w-4" /> Profile & Settings
+              <UserIcon className="mr-2 h-4 w-4" /> Profile
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => nav({ to: "/" })} className="rounded-lg text-destructive focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" /> Sign out
