@@ -19,6 +19,7 @@ import { Route as AppRefillRouteImport } from './routes/_app.refill'
 import { Route as AppNotificationsRouteImport } from './routes/_app.notifications'
 import { Route as AppMedicationRouteImport } from './routes/_app.medication'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppAiAssistantRouteImport } from './routes/_app.ai-assistant'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -69,9 +70,15 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAiAssistantRoute = AppAiAssistantRouteImport.update({
+  id: '/ai-assistant',
+  path: '/ai-assistant',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ai-assistant': typeof AppAiAssistantRoute
   '/dashboard': typeof AppDashboardRoute
   '/medication': typeof AppMedicationRoute
   '/notifications': typeof AppNotificationsRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ai-assistant': typeof AppAiAssistantRoute
   '/dashboard': typeof AppDashboardRoute
   '/medication': typeof AppMedicationRoute
   '/notifications': typeof AppNotificationsRoute
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/ai-assistant': typeof AppAiAssistantRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/medication': typeof AppMedicationRoute
   '/_app/notifications': typeof AppNotificationsRoute
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-assistant'
     | '/dashboard'
     | '/medication'
     | '/notifications'
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-assistant'
     | '/dashboard'
     | '/medication'
     | '/notifications'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/ai-assistant'
     | '/_app/dashboard'
     | '/_app/medication'
     | '/_app/notifications'
@@ -219,10 +231,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ai-assistant': {
+      id: '/_app/ai-assistant'
+      path: '/ai-assistant'
+      fullPath: '/ai-assistant'
+      preLoaderRoute: typeof AppAiAssistantRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppAiAssistantRoute: typeof AppAiAssistantRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMedicationRoute: typeof AppMedicationRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
@@ -234,6 +254,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAiAssistantRoute: AppAiAssistantRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMedicationRoute: AppMedicationRoute,
   AppNotificationsRoute: AppNotificationsRoute,
