@@ -1,9 +1,9 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, Pill, Radio, Bot, FileBarChart, Bell, ScanLine, RefreshCcw,
   Settings, Activity, Users, Stethoscope, HardDrive, ScrollText, LineChart,
   HeartPulse, AlertTriangle, ClipboardList, Calendar, PhoneCall, History,
-  BookOpen, NotebookPen, SlidersHorizontal, ServerCog, LogOut,
+  BookOpen, NotebookPen, SlidersHorizontal, ServerCog,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
