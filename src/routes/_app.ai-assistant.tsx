@@ -141,9 +141,8 @@ function AIAssistant() {
             </div>
             <div className="min-w-0">
               <div className="truncate font-display text-base font-bold">MediMind AI Assistant</div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span className="flex h-2 w-2 rounded-full bg-success animate-pulse" /> Online · GPT-4 Health · streaming
-              </div>
+              <div className="text-xs text-muted-foreground">Your intelligent health companion</div>
+
             </div>
           </div>
           <div className="flex items-center gap-1.5">
