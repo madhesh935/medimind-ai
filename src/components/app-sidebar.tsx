@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Pill, Radio, Bot, FileBarChart, Bell, ScanLine, RefreshCcw,
   Settings, Activity, Users, Stethoscope, HardDrive, ScrollText, LineChart,
   HeartPulse, AlertTriangle, ClipboardList, Calendar, PhoneCall, History,
-  BookOpen, NotebookPen, SlidersHorizontal, ServerCog, LogOut, Sparkles,
+  BookOpen, NotebookPen, SlidersHorizontal, ServerCog, LogOut,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
