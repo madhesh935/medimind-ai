@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Camera, ScanLine, Sparkles, Upload } from "lucide-react";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/scanner")({ component: Scanner });
 
 function Scanner() {
@@ -27,8 +29,8 @@ function Scanner() {
               <div className="text-sm text-muted-foreground">JPG, PNG, PDF — up to 20MB</div>
             </div>
             <div className="flex gap-2">
-              <Button className="rounded-xl bg-gradient-primary"><Upload className="mr-1.5 h-4 w-4" />Upload file</Button>
-              <Button variant="outline" className="rounded-xl"><Camera className="mr-1.5 h-4 w-4" />Camera capture</Button>
+              <Button onClick={() => toast.success("Prescription file uploaded! AI is analyzing...")} className="rounded-xl bg-gradient-primary"><Upload className="mr-1.5 h-4 w-4" />Upload file</Button>
+              <Button onClick={() => toast.info("Opening camera capture...")} variant="outline" className="rounded-xl"><Camera className="mr-1.5 h-4 w-4" />Camera capture</Button>
             </div>
             <div className="mt-6 grid grid-cols-3 gap-2 text-xs">
               {["JPEG","PNG","PDF"].map(x=><Badge key={x} variant="outline" className="rounded-full">{x}</Badge>)}
@@ -55,7 +57,7 @@ function Scanner() {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" className="rounded-xl">Cancel</Button>
-              <Button className="rounded-xl bg-gradient-primary">Save schedule</Button>
+              <Button onClick={() => toast.success("Prescription parsed and saved to your schedule successfully!")} className="rounded-xl bg-gradient-primary">Save schedule</Button>
             </div>
           </CardContent>
         </Card>

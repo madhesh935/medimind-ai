@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { UserPlus, Star } from "lucide-react";
 import { doctors } from "@/lib/mock-data";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/doctors")({ component: Doctors });
 
 function Doctors() {
@@ -15,7 +17,7 @@ function Doctors() {
           <h1 className="font-display text-3xl font-bold">Doctors</h1>
           <p className="text-sm text-muted-foreground">All clinicians registered on the MediMind platform.</p>
         </div>
-        <Button className="rounded-xl bg-gradient-primary shadow-glow"><UserPlus className="mr-2 h-4 w-4" />Add doctor</Button>
+        <Button onClick={() => toast.info("Opening sheet to register a new doctor...")} className="rounded-xl bg-gradient-primary shadow-glow"><UserPlus className="mr-2 h-4 w-4" />Add doctor</Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -39,8 +41,8 @@ function Doctors() {
                 <div className="rounded-xl bg-muted/40 p-2.5"><div className="text-muted-foreground">Status</div><div className="font-bold text-sm">{d.status}</div></div>
               </div>
               <div className="mt-4 flex gap-2">
-                <Button size="sm" variant="outline" className="flex-1 rounded-xl">View</Button>
-                <Button size="sm" className="flex-1 rounded-xl bg-gradient-primary">Message</Button>
+                <Button onClick={() => toast.info(`Viewing profile for ${d.name}...`)} size="sm" variant="outline" className="flex-1 rounded-xl">View</Button>
+                <Button onClick={() => toast.success(`Starting chat with ${d.name}...`)} size="sm" className="flex-1 rounded-xl bg-gradient-primary">Message</Button>
               </div>
             </CardContent>
           </Card>

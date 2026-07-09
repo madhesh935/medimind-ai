@@ -7,6 +7,8 @@ import { inventory, medications } from "@/lib/mock-data";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MapPin, Truck } from "lucide-react";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/refill")({ component: Refill });
 
 function Refill() {
@@ -49,7 +51,10 @@ function Refill() {
                 <div className="mt-3 text-center text-xs text-muted-foreground">Refill by {m.refillDate}</div>
                 <div className="mt-3 flex items-center justify-between rounded-xl bg-muted/40 p-3 text-xs">
                   <span>Auto refill</span>
-                  <Switch defaultChecked={i % 2 === 0} />
+                  <Switch
+                    defaultChecked={i % 2 === 0}
+                    onCheckedChange={(checked) => toast.success(`${m.name} auto-refill ${checked ? "enabled" : "disabled"}`)}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -90,7 +95,7 @@ function Refill() {
                 <Badge className="rounded-full bg-success/15 text-success">{p.t}</Badge>
               </div>
             ))}
-            <Button className="w-full rounded-xl bg-gradient-primary"><Truck className="mr-1.5 h-4 w-4" />Request delivery</Button>
+            <Button onClick={() => toast.success("Refill delivery request dispatched successfully!")} className="w-full rounded-xl bg-gradient-primary"><Truck className="mr-1.5 h-4 w-4" />Request delivery</Button>
           </CardContent>
         </Card>
       </div>

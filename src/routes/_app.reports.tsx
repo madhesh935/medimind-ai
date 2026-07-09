@@ -5,6 +5,8 @@ import { Download, FileText, Printer, Sheet, TrendingUp, Calendar } from "lucide
 import { monthlyAdherence, reminderPie, weeklyAdherence } from "@/lib/mock-data";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Line, LineChart } from "recharts";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/reports")({ component: Reports });
 
 function Reports() {
@@ -16,10 +18,10 @@ function Reports() {
           <p className="text-sm text-muted-foreground">Generate professional adherence and risk reports.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="rounded-xl"><FileText className="mr-1.5 h-4 w-4" />PDF</Button>
-          <Button variant="outline" className="rounded-xl"><Sheet className="mr-1.5 h-4 w-4" />Excel</Button>
-          <Button variant="outline" className="rounded-xl"><Download className="mr-1.5 h-4 w-4" />CSV</Button>
-          <Button className="rounded-xl bg-gradient-primary"><Printer className="mr-1.5 h-4 w-4" />Print</Button>
+          <Button onClick={() => toast.success("PDF report generated!")} variant="outline" className="rounded-xl"><FileText className="mr-1.5 h-4 w-4" />PDF</Button>
+          <Button onClick={() => toast.success("Excel report exported!")} variant="outline" className="rounded-xl"><Sheet className="mr-1.5 h-4 w-4" />Excel</Button>
+          <Button onClick={() => toast.success("CSV download started!")} variant="outline" className="rounded-xl"><Download className="mr-1.5 h-4 w-4" />CSV</Button>
+          <Button onClick={() => toast.info("Sending report to printer...")} className="rounded-xl bg-gradient-primary"><Printer className="mr-1.5 h-4 w-4" />Print</Button>
         </div>
       </div>
 
@@ -37,8 +39,8 @@ function Reports() {
               <div className="text-xs uppercase tracking-widest text-muted-foreground">{r.d}</div>
               <div className="font-display text-lg font-bold">{r.t}</div>
               <div className="mt-3 flex gap-2">
-                <Button size="sm" variant="outline" className="rounded-lg">View</Button>
-                <Button size="sm" className="rounded-lg bg-gradient-primary">Download</Button>
+                <Button onClick={() => toast.info(`Opening ${r.t}...`)} size="sm" variant="outline" className="rounded-lg">View</Button>
+                <Button onClick={() => toast.success(`Downloading ${r.t}...`)} size="sm" className="rounded-lg bg-gradient-primary">Download</Button>
               </div>
             </CardContent>
           </Card>

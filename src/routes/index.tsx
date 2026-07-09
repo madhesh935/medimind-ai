@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Activity, Mail, Lock, Sparkles, HeartPulse, Stethoscope, Shield, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { setRole, type Role } from "@/lib/role-store";
+import { apiLogin } from "@/lib/api";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,23 +21,48 @@ export const Route = createFileRoute("/")({
   component: Login,
 });
 
-const roles: { id: Role; label: string; desc: string; Icon: typeof User; grad: string }[] = [
-  { id: "patient", label: "Patient", desc: "Track my medicine", Icon: User, grad: "from-blue-500 to-indigo-600" },
-  { id: "caregiver", label: "Caregiver", desc: "Care for a loved one", Icon: HeartPulse, grad: "from-emerald-500 to-teal-600" },
-  { id: "doctor", label: "Doctor", desc: "Manage patients", Icon: Stethoscope, grad: "from-purple-500 to-fuchsia-600" },
-  { id: "admin", label: "Admin", desc: "Hospital control center", Icon: Shield, grad: "from-rose-500 to-orange-500" },
+const roles: { id: Role; label: string; desc: string; Icon: typeof User; grad: string; email: string }[] = [
+  { id: "patient", label: "Patient", desc: "Track my medicine", Icon: User, grad: "from-blue-500 to-indigo-600", email: "patient@medimind.ai" },
+  { id: "caregiver", label: "Caregiver", desc: "Care for a loved one", Icon: HeartPulse, grad: "from-emerald-500 to-teal-600", email: "caregiver@medimind.ai" },
+  { id: "doctor", label: "Doctor", desc: "Manage patients", Icon: Stethoscope, grad: "from-purple-500 to-fuchsia-600", email: "doctor@medimind.ai" },
+  { id: "admin", label: "Admin", desc: "Hospital control center", Icon: Shield, grad: "from-rose-500 to-orange-500", email: "admin@medimind.ai" },
 ];
 
 function Login() {
   const nav = useNavigate();
   const [selected, setSelected] = useState<Role>("patient");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
-  const submit = (e: React.FormEvent) => {
+  const handleRoleSelect = (role: Role) => {
+    setSelected(role);
+    setError(null);
+    const roleData = roles.find((r) => r.id === role);
+    if (emailRef.current && roleData) {
+      emailRef.current.value = roleData.email;
+    }
+  };
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setRole(selected);
-    setTimeout(() => nav({ to: "/dashboard" }), 500);
+    setError(null);
+
+    const email = emailRef.current?.value || "";
+    const password = passwordRef.current?.value || "";
+
+    try {
+      const data = await apiLogin(email, password);
+      const serverRole = (data.user.role as Role) || selected;
+      setRole(serverRole);
+      nav({ to: "/dashboard" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Login failed";
+      setError(msg);
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,7 +124,7 @@ function Login() {
                   <button
                     key={r.id}
                     type="button"
-                    onClick={() => setSelected(r.id)}
+                    onClick={() => handleRoleSelect(r.id)}
                     className={`group relative flex items-center gap-2.5 rounded-xl border p-3 text-left transition-all ${active ? "border-primary bg-primary/5 shadow-glow" : "border-border/60 hover:border-primary/40 hover:bg-muted/40"}`}
                   >
                     <div className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${r.grad} text-white`}>
@@ -119,16 +145,21 @@ function Login() {
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="email" type="email" defaultValue="demo@medimind.ai" className="h-11 rounded-xl pl-10" />
+                <Input id="email" ref={emailRef} type="email" defaultValue="patient@medimind.ai" className="h-11 rounded-xl pl-10" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="password" type="password" defaultValue="password" className="h-11 rounded-xl pl-10" />
+                <Input id="password" ref={passwordRef} type="password" defaultValue="password123" className="h-11 rounded-xl pl-10" />
               </div>
             </div>
+            {error && (
+              <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+                {error}
+              </div>
+            )}
             <Button type="submit" disabled={loading} className="h-11 w-full rounded-xl bg-gradient-primary text-base font-semibold shadow-glow">
               {loading ? "Signing in…" : `Sign in as ${roles.find((r) => r.id === selected)!.label}`}
             </Button>

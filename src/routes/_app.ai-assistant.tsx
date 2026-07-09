@@ -7,36 +7,14 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { chatSuggestions } from "@/lib/mock-data";
 import { useRole, roleMeta } from "@/lib/role-store";
+import { sendMessage, createConversation, getStoredUser } from "@/lib/api";
 
 export const Route = createFileRoute("/_app/ai-assistant")({ component: AIAssistant });
 
 type Msg = { id: number; role: "user" | "ai"; text: string; card?: "adherence" | "medicine" | "risk" | "highrisk" };
-
-function replyFor(role: string, q: string): Msg {
-  const s = q.toLowerCase();
-  const id = Date.now();
-  if (s.includes("adherence") && !s.includes("report"))
-    return { id, role: "ai", text: `Your adherence this week is **94%** — the highest in the last 30 days. Morning doses: 100%. Evening: 87%.`, card: "adherence" };
-  if (s.includes("report") || s.includes("summarize"))
-    return { id, role: "ai", text: "Here's your weekly health report card:", card: "adherence" };
-  if (s.includes("take") && s.includes("today"))
-    return { id, role: "ai", text: "Yes ✅ — you took **Metformin at 8:03 AM** and **Lisinopril at 9:00 AM** today. Your next dose is Metformin at 8:00 PM." };
-  if (s.includes("next dose"))
-    return { id, role: "ai", text: "Your next dose is **Metformin 500mg** at **8:00 PM** — in 4 hours 12 minutes.", card: "medicine" };
-  if (s.includes("interact") && s.includes("metformin"))
-    return { id, role: "ai", text: "**Metformin interactions to watch:**\n\n- Alcohol (increases lactic acidosis risk)\n- Contrast dyes (temporary hold advised)\n- Cimetidine (raises Metformin levels)\n\nAlways consult Dr. Patel before adding new medications." };
-  if (s.includes("risk"))
-    return { id, role: "ai", text: "Your risk score is **18 / 100 (Low)**. Main drivers:\n\n1. Consistent morning routine (+)\n2. Slight drop in evening adherence (−)\n3. Stable blood pressure trend (+)", card: "risk" };
-  if (s.includes("high risk") || s.includes("high-risk"))
-    return { id, role: "ai", text: "There are **12 high-risk patients** this week:", card: "highrisk" };
-  if (s.includes("refill"))
-    return { id, role: "ai", text: "**Refill status:**\n- Metformin: 24 pills (12 days)\n- Lisinopril: 18 pills (18 days)\n- Atorvastatin: 12 pills (12 days) ⚠️\n- Aspirin: 30 pills (30 days)" };
-  if (s.includes("did") && s.includes("john"))
-    return { id, role: "ai", text: "Yes — **John took today's medicines**. Metformin at 8:04 AM, Lisinopril at 9:00 AM." };
-  return { id, role: "ai", text: `Great question. Based on ${role === "doctor" ? "patient population data" : "your recent activity"}, everything looks on track. Ask me for a detailed report or specific medication.` };
-}
 
 function AIAssistant() {
   const role = useRole();
@@ -51,6 +29,7 @@ function AIAssistant() {
   const [copied, setCopied] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const convIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -58,29 +37,44 @@ function AIAssistant() {
 
   useEffect(() => { inputRef.current?.focus(); }, []);
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     if (!text.trim()) return;
     const userMsg: Msg = { id: Date.now(), role: "user", text };
     setMsgs((m) => [...m, userMsg]);
     setInput("");
     setThinking(true);
-    setTimeout(() => {
-      const r = replyFor(role, text);
+
+    try {
+      // Lazily create a conversation on the first message
+      if (!convIdRef.current) {
+        const storedUser = getStoredUser();
+        const userId = storedUser?.id ?? 1;
+        const conv = await createConversation(userId, text.slice(0, 50));
+        convIdRef.current = conv.id;
+      }
+
+      const aiMsg = await sendMessage(convIdRef.current!, text);
       setThinking(false);
-      // stream
+
+      // Stream the reply character by character for a nice UX
+      const fullText = aiMsg.message;
       let i = 0;
       const iv = setInterval(() => {
-        i += 3;
-        setStreaming(r.text.slice(0, i));
-        if (i >= r.text.length) {
+        i += 4;
+        setStreaming(fullText.slice(0, i));
+        if (i >= fullText.length) {
           clearInterval(iv);
           setStreaming("");
-          setMsgs((m) => [...m, r]);
+          setMsgs((m) => [...m, { id: aiMsg.id, role: "ai", text: fullText }]);
           inputRef.current?.focus();
         }
-      }, 18);
-    }, 550);
+      }, 15);
+    } catch {
+      setThinking(false);
+      setMsgs((m) => [...m, { id: Date.now(), role: "ai", text: "⚠️ Could not reach MediMind AI backend. Please ensure the server is running at http://localhost:8000." }]);
+    }
   };
+
 
   return (
     <div className="h-[calc(100vh-8rem)]">

@@ -8,6 +8,8 @@ import { Search, Filter, Download, ChevronRight } from "lucide-react";
 import { patients } from "@/lib/mock-data";
 import { useRole } from "@/lib/role-store";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/patients")({ component: Patients });
 
 function Patients() {
@@ -21,8 +23,8 @@ function Patients() {
           <p className="text-sm text-muted-foreground">Live adherence, risk and status across your patient population.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="rounded-xl"><Filter className="mr-2 h-4 w-4" />Filters</Button>
-          <Button className="rounded-xl bg-gradient-primary shadow-glow"><Download className="mr-2 h-4 w-4" />Export</Button>
+          <Button onClick={() => toast.info("Opening filter options...")} variant="outline" className="rounded-xl"><Filter className="mr-2 h-4 w-4" />Filters</Button>
+          <Button onClick={() => toast.success("Exporting patient list to CSV...")} className="rounded-xl bg-gradient-primary shadow-glow"><Download className="mr-2 h-4 w-4" />Export</Button>
         </div>
       </div>
 
@@ -68,7 +70,7 @@ function Patients() {
                   <td className="p-3"><div className="flex items-center gap-2"><Progress value={p.adherence} className="h-1.5 w-24" /><span className="text-xs font-semibold">{p.adherence}%</span></div></td>
                   <td className="p-3 text-muted-foreground">{p.lastDose}</td>
                   <td className="p-3"><Badge variant="outline" className="rounded-full">{p.status}</Badge></td>
-                  <td className="p-3 text-right"><Button size="icon" variant="ghost" className="rounded-xl"><ChevronRight className="h-4 w-4" /></Button></td>
+                  <td className="p-3 text-right"><Button onClick={() => toast.info(`Opening file details for ${p.name}...`)} size="icon" variant="ghost" className="rounded-xl"><ChevronRight className="h-4 w-4" /></Button></td>
                 </tr>
               ))}
             </tbody>

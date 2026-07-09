@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, UserPlus, Shield, MoreVertical } from "lucide-react";
 import { patients, doctors, platformStats } from "@/lib/mock-data";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/users")({ component: Users });
 
 const users = [
@@ -31,7 +33,7 @@ function Users() {
           <h1 className="font-display text-3xl font-bold">User management</h1>
           <p className="text-sm text-muted-foreground">All patients, doctors, caregivers and admins across the platform.</p>
         </div>
-        <Button className="rounded-xl bg-gradient-primary shadow-glow"><UserPlus className="mr-2 h-4 w-4" />Invite user</Button>
+        <Button onClick={() => toast.success("Invitation link generated and copied to clipboard!")} className="rounded-xl bg-gradient-primary shadow-glow"><UserPlus className="mr-2 h-4 w-4" />Invite user</Button>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
@@ -56,7 +58,7 @@ function Users() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Search users…" className="h-9 rounded-xl pl-9" />
             </div>
-            <Button variant="outline" className="rounded-xl"><Shield className="mr-2 h-4 w-4" />Roles</Button>
+            <Button onClick={() => toast.info("Opening Roles & Permissions panel...")} variant="outline" className="rounded-xl"><Shield className="mr-2 h-4 w-4" />Roles</Button>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -77,7 +79,7 @@ function Users() {
                   <td className="p-3 text-muted-foreground">{u.email}</td>
                   <td className="p-3"><Badge variant="outline" className="rounded-full">{u.status}</Badge></td>
                   <td className="p-3 text-muted-foreground">{u.joined}</td>
-                  <td className="p-3 text-right"><Button size="icon" variant="ghost" className="rounded-xl"><MoreVertical className="h-4 w-4" /></Button></td>
+                  <td className="p-3 text-right"><Button onClick={() => toast.info(`Action menu opened for ${u.name}`)} size="icon" variant="ghost" className="rounded-xl"><MoreVertical className="h-4 w-4" /></Button></td>
                 </tr>
               ))}
             </tbody>

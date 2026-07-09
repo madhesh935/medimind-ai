@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Plus, FileText, Search, Sparkles } from "lucide-react";
 import { medications, patients } from "@/lib/mock-data";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/prescriptions")({ component: Prescriptions });
 
 const prescriptions = patients.slice(0, 6).map((p, i) => ({
@@ -24,7 +26,7 @@ function Prescriptions() {
           <h1 className="font-display text-3xl font-bold">Prescriptions</h1>
           <p className="text-sm text-muted-foreground">Issue, review and manage every active prescription in your care.</p>
         </div>
-        <Button className="rounded-xl bg-gradient-primary shadow-glow"><Plus className="mr-2 h-4 w-4" />New prescription</Button>
+        <Button onClick={() => toast.info("Opening new prescription sheet...")} className="rounded-xl bg-gradient-primary shadow-glow"><Plus className="mr-2 h-4 w-4" />New prescription</Button>
       </div>
 
       <Card>
@@ -48,7 +50,7 @@ function Prescriptions() {
                 </div>
                 <div className="mt-0.5 text-[11px] text-muted-foreground/80">Issued {rx.date} · Dr. Priya Patel</div>
               </div>
-              <Button size="sm" variant="outline" className="rounded-xl">Renew</Button>
+              <Button onClick={() => toast.success(`Prescription renewal request submitted for ${rx.name}!`)} size="sm" variant="outline" className="rounded-xl">Renew</Button>
             </div>
           ))}
         </CardContent>
@@ -71,8 +73,8 @@ function Prescriptions() {
               <div className="mt-1 text-sm text-primary">{s.s}</div>
               <div className="mt-1 text-xs text-muted-foreground">{s.r}</div>
               <div className="mt-2 flex gap-2">
-                <Button size="sm" className="rounded-xl bg-gradient-primary">Accept</Button>
-                <Button size="sm" variant="outline" className="rounded-xl">Review</Button>
+                <Button onClick={() => toast.success(`AI recommendation accepted for ${s.p}!`)} size="sm" className="rounded-xl bg-gradient-primary">Accept</Button>
+                <Button onClick={() => toast.info(`Reviewing prescription changes for ${s.p}...`)} size="sm" variant="outline" className="rounded-xl">Review</Button>
               </div>
             </div>
           ))}

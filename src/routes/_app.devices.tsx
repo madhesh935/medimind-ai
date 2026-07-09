@@ -7,6 +7,8 @@ import { HardDrive, Wifi, WifiOff, Battery, RefreshCcw } from "lucide-react";
 import { devices, platformStats } from "@/lib/mock-data";
 import { StatCard } from "@/components/stat-card";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/devices")({ component: Devices });
 
 function Devices() {
@@ -27,7 +29,7 @@ function Devices() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base font-semibold">Device fleet</CardTitle>
-          <Button size="sm" className="rounded-xl bg-gradient-primary"><RefreshCcw className="mr-2 h-4 w-4" />Sync all</Button>
+          <Button size="sm" onClick={() => toast.success("Device synchronization triggered successfully!")} className="rounded-xl bg-gradient-primary"><RefreshCcw className="mr-2 h-4 w-4" />Sync all</Button>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">

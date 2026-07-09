@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useRole, roleMeta, type Role } from "@/lib/role-store";
+import { notifications } from "@/lib/mock-data";
+import { apiLogout } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 const roleBadgeStyles: Record<Role, string> = {
   patient: "border-primary/40 bg-primary/10 text-primary",
@@ -25,6 +28,15 @@ export function TopNavbar() {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
+  const unreadCount = notifications.length;
+  const hasDanger = notifications.some((n) => n.type === "danger");
+  const hasWarning = notifications.some((n) => n.type === "warning");
+  const badgeColor = hasDanger 
+    ? "bg-destructive text-destructive-foreground" 
+    : hasWarning 
+    ? "bg-amber-500 text-white" 
+    : "bg-blue-500 text-white";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border/60 bg-background/70 px-3 backdrop-blur-xl sm:px-6">
       <SidebarTrigger />
@@ -41,7 +53,11 @@ export function TopNavbar() {
         </Button>
         <Button size="icon" variant="ghost" className="relative rounded-xl">
           <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive" />
+          {unreadCount > 0 && (
+            <Badge className={cn("absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full p-0 text-[9px] font-bold border-0 shadow-sm", badgeColor)}>
+              {unreadCount}
+            </Badge>
+          )}
         </Button>
 
         {/* Current user info */}
@@ -60,7 +76,7 @@ export function TopNavbar() {
         <Button
           variant="ghost"
           className="ml-1 flex items-center gap-2 rounded-xl border border-border/60 bg-card/60 px-3 py-2 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
-          onClick={() => nav({ to: "/" })}
+          onClick={() => { apiLogout(); nav({ to: "/" }); }}
         >
           <LogOut className="h-4 w-4" />
           <span className="hidden text-sm font-medium sm:inline">Logout</span>

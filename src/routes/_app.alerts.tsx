@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, Bell, Phone, MessageCircle, Stethoscope } from "lucide-react";
 import { notifications } from "@/lib/mock-data";
 
+import { toast } from "sonner";
+
 export const Route = createFileRoute("/_app/alerts")({ component: Alerts });
 
 const critical = [
@@ -42,9 +44,9 @@ function Alerts() {
               </div>
               <p className="mt-3 text-sm text-muted-foreground">{a.body}</p>
               <div className="mt-4 flex gap-2">
-                <Button size="sm" className="rounded-xl bg-gradient-primary"><Phone className="mr-1.5 h-3.5 w-3.5" />Call</Button>
-                <Button size="sm" variant="outline" className="rounded-xl"><MessageCircle className="mr-1.5 h-3.5 w-3.5" />Message</Button>
-                <Button size="sm" variant="outline" className="rounded-xl"><Stethoscope className="mr-1.5 h-3.5 w-3.5" />Notify doctor</Button>
+                <Button onClick={() => toast.info(`Initiating call to ${a.patient}...`)} size="sm" className="rounded-xl bg-gradient-primary"><Phone className="mr-1.5 h-3.5 w-3.5" />Call</Button>
+                <Button onClick={() => toast.info(`Opening messaging screen for ${a.patient}...`)} size="sm" variant="outline" className="rounded-xl"><MessageCircle className="mr-1.5 h-3.5 w-3.5" />Message</Button>
+                <Button onClick={() => toast.success(`Dr. Priya Patel has been notified regarding ${a.patient}.`)} size="sm" variant="outline" className="rounded-xl"><Stethoscope className="mr-1.5 h-3.5 w-3.5" />Notify doctor</Button>
               </div>
             </CardContent>
           </Card>
