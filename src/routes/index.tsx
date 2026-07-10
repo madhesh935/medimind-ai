@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Activity, Mail, Lock, Sparkles, HeartPulse, Stethoscope, Shield, User, ArrowRight } from "lucide-react";
+import { Activity, Mail, Lock, Sparkles, HeartPulse, Stethoscope, Shield, User, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,6 +55,10 @@ function Login() {
 
     try {
       const data = await apiLogin(email, password);
+      
+      // Artificial delay for realistic loading UX (1.2 seconds)
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
       const serverRole = (data.user.role as Role) || selected;
       setRole(serverRole);
       nav({ to: "/dashboard" });
@@ -199,7 +203,16 @@ function Login() {
             <Button type="submit" disabled={loading} className="group relative h-12 w-full overflow-hidden rounded-xl bg-gradient-primary text-base font-bold shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5">
               <div className="absolute inset-0 bg-white/20 translate-y-full transition-transform duration-300 group-hover:translate-y-0" />
               <span className="relative flex items-center justify-center gap-2">
-                {loading ? <Activity className="h-5 w-5 animate-pulse" /> : <>Sign in as {roles.find((r) => r.id === selected)!.label} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></>}
+                {loading ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  <>
+                    Sign in as {roles.find((r) => r.id === selected)!.label} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
               </span>
             </Button>
           </form>

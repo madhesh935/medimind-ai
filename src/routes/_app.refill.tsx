@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getMedicines, updateMedicine, type Medicine } from "@/lib/api";
+import { getMedicines, updateMedicine, type Medicine, MOCK_MEDICINES } from "@/lib/api";
 import { inventory as mockInventory } from "@/lib/mock-data";
 import { chartColors } from "@/lib/chart-colors";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -47,13 +47,13 @@ const CapsuleProgress = ({ pct }: { pct: number }) => {
 };
 
 function Refill() {
-  const [medicines, setMedicines] = useState<Medicine[] | null>(null);
+  const [medicines, setMedicines] = useState<Medicine[] | null>(MOCK_MEDICINES);
   const [pending, setPending] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     getMedicines()
-      .then((meds) => setMedicines(meds.length ? meds : null))
-      .catch(() => setMedicines(null));
+      .then((meds) => { if (meds.length) setMedicines(meds); })
+      .catch((err) => console.warn("Using instant mock data:", err));
   }, []);
 
   const rows = medicines ?? null;

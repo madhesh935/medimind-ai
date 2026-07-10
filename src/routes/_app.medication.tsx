@@ -8,7 +8,7 @@ import { AlertTriangle, Clock, Pause, Pencil, Pill, Utensils, Eye, Trash2, Plus,
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getMedicines, createMedicine } from "@/lib/api";
+import { getMedicines, createMedicine, type Medicine, MOCK_MEDICINES } from "@/lib/api";
 
 export const Route = createFileRoute("/_app/medication")({ component: MedicationPage });
 
@@ -26,8 +26,21 @@ interface MedType {
 }
 
 function MedicationPage() {
-  const [meds, setMeds] = useState<MedType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [meds, setMeds] = useState<MedType[]>(
+    MOCK_MEDICINES.map((m) => ({
+      id: m.id,
+      name: m.medicine_name,
+      purpose: m.instructions || m.frequency || "Prescription",
+      dosage: m.dosage,
+      schedule: m.schedule ? m.schedule.join(" · ") : "8:00 AM",
+      food: "With meals",
+      sideEffects: ["None reported"],
+      warnings: [],
+      remaining: m.remaining_pills,
+      color: "from-blue-500 to-indigo-600"
+    }))
+  );
+  const [loading, setLoading] = useState(false); // Instantly true due to mock data
   const [dialogOpen, setDialogOpen] = useState(false);
   
   // Form fields
@@ -44,7 +57,7 @@ function MedicationPage() {
       try {
         const data = await getMedicines();
         if (data && data.length > 0) {
-          const formatted: MedType[] = data.map((m: any) => ({
+          const formatted: MedType[] = data.map((m: Medicine) => ({
             id: m.id,
             name: m.medicine_name,
             purpose: m.instructions || m.frequency || "Prescription",
@@ -57,12 +70,9 @@ function MedicationPage() {
             color: "from-blue-500 to-indigo-600"
           }));
           setMeds(formatted);
-        } else {
-          setMeds(mockMedications);
         }
       } catch (err) {
-        console.warn("Could not load medicines from backend, falling back to mock data:", err);
-        setMeds(mockMedications);
+        console.warn("Using instant mock data:", err);
       } finally {
         setLoading(false);
       }

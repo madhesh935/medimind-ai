@@ -5,34 +5,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, FileText, Search, Sparkles, CheckCircle2 } from "lucide-react";
-import { medications, patients as mockPatients } from "@/lib/mock-data";
-import { getPatientsList, getAIPrediction, applyAIRecommendation, type PatientSummary, type AIRecommendation } from "@/lib/api";
+import { getPatientsList, getAIPrediction, applyAIRecommendation, type PatientSummary, type AIRecommendation, MOCK_PATIENTS } from "@/lib/api";
 
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/prescriptions")({ component: Prescriptions });
 
-const mockPrescriptions = mockPatients.slice(0, 6).map((p, i) => ({
-  name: p.name, disease: p.disease,
-  medicine: medications[i % medications.length].name,
-  dosage: medications[i % medications.length].dosage,
-  refills: [3, 2, 5, 1, 4, 2][i],
-  date: ["Nov 2", "Oct 30", "Oct 28", "Oct 25", "Oct 22", "Oct 18"][i],
-}));
-
 type Suggestion = AIRecommendation & { patientName: string };
 
 function Prescriptions() {
   const [search, setSearch] = useState("");
-  const [live, setLive] = useState<PatientSummary[] | null>(null);
+  const [live, setLive] = useState<PatientSummary[]>(MOCK_PATIENTS);
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
 
   useEffect(() => {
-    getPatientsList().then(setLive).catch(() => setLive(null));
+    getPatientsList().then(setLive).catch((err) => console.warn("Using instant mock data:", err));
   }, []);
 
   useEffect(() => {
-    if (!live || live.length === 0) return;
+    if (live.length === 0) return;
     Promise.all(
       live.slice(0, 6).map((p) =>
         getAIPrediction(p.user_id)
@@ -42,18 +33,14 @@ function Prescriptions() {
     ).then((lists) => setSuggestions(lists.flat().filter((s) => !s.applied).slice(0, 4)));
   }, [live]);
 
-  const usingLive = live !== null && live.length > 0;
-
-  const prescriptions = usingLive
-    ? live!.filter((p) => p.medications.length > 0).map((p) => ({
-        name: p.name,
-        disease: p.risk === "High" ? "High risk" : p.status,
-        medicine: p.medications[0],
-        dosage: "",
-        refills: p.medications.length,
-        date: p.last_dose ? new Date(p.last_dose).toLocaleDateString() : "—",
-      }))
-    : mockPrescriptions;
+  const prescriptions = live.filter((p) => p.medications.length > 0).map((p) => ({
+    name: p.name,
+    disease: p.risk === "High" ? "High risk" : p.status,
+    medicine: p.medications[0],
+    dosage: "500mg", // Hardcoded mock display since PatientSummary doesn't have dosages
+    refills: p.medications.length,
+    date: p.last_dose ? new Date(p.last_dose).toLocaleDateString() : "—",
+  }));
 
   const filteredPrescriptions = prescriptions.filter((rx) => {
     const q = search.toLowerCase();

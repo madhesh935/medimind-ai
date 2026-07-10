@@ -3,14 +3,16 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { getMyDevice, getDeviceEvents, getMedicines, type MyDevice } from "@/lib/api";
+import { getMyDevice, getDeviceEvents, getMedicines, type MyDevice, MOCK_MY_DEVICE, MOCK_MEDICINES } from "@/lib/api";
 import { Battery, Wifi, Thermometer, Weight, Lock, Move, Cpu, Radio, Activity, Gauge } from "lucide-react";
 
 export const Route = createFileRoute("/_app/smart-bottle")({ component: SmartBottle });
 
 function SmartBottle() {
-  const [device, setDevice] = useState<MyDevice | null>(null);
-  const [pillCount, setPillCount] = useState<number | null>(null);
+  const [device, setDevice] = useState<MyDevice | null>(MOCK_MY_DEVICE);
+  const [pillCount, setPillCount] = useState<number | null>(
+    MOCK_MEDICINES.reduce((sum, m) => sum + m.remaining_pills, 0)
+  );
   const [lastOpened, setLastOpened] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
@@ -22,11 +24,12 @@ function SmartBottle() {
         const lastOpen = (events as { event_type: string; timestamp: string }[]).find((e) => e.event_type === "open");
         if (lastOpen) setLastOpened(new Date(lastOpen.timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
       })
-      .catch(() => setDevice(null))
+      .catch((err) => console.warn("Using instant mock data:", err))
       .finally(() => setLoaded(true));
+      
     getMedicines()
       .then((meds) => setPillCount(meds.reduce((sum, m) => sum + m.remaining_pills, 0)))
-      .catch(() => setPillCount(null));
+      .catch((err) => console.warn("Using instant mock data:", err));
   }, []);
 
   const connected = device?.wifi_status === "connected";

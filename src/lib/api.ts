@@ -69,6 +69,62 @@ export const MOCK_ADMIN_DEVICES: AdminDevice[] = [
   { id: 5, device_id: "SB-A1-4423", patient_name: "Robert Kim", battery: 0, wifi_status: "disconnected", firmware_version: "3.1.8", last_sync: new Date(Date.now() - 48 * 3600000).toISOString(), open_count: 0 },
 ];
 
+export const MOCK_MEDICINES: Medicine[] = [
+  { id: 1, patient_id: 1, medicine_name: "Metformin", dosage: "500mg", frequency: "Twice daily", schedule: ["08:00", "20:00"], instructions: "With meals", remaining_pills: 24, status: "active", auto_refill: true },
+  { id: 2, patient_id: 1, medicine_name: "Lisinopril", dosage: "10mg", frequency: "Once daily", schedule: ["09:00"], instructions: "Any time", remaining_pills: 18, status: "active", auto_refill: true },
+  { id: 3, patient_id: 1, medicine_name: "Atorvastatin", dosage: "20mg", frequency: "Once daily", schedule: ["22:00"], instructions: "With or without food", remaining_pills: 12, status: "active", auto_refill: false },
+  { id: 4, patient_id: 1, medicine_name: "Aspirin", dosage: "81mg", frequency: "Once daily", schedule: ["09:00"], instructions: "With food", remaining_pills: 30, status: "active", auto_refill: true },
+];
+
+export const MOCK_MED_LOGS = (() => {
+  const logs = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    [1, 2, 3].forEach((medId, j) => {
+      const scheduled = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 8 + j * 2, 0);
+      const rng = Math.random();
+      const status = rng > 0.12 ? "taken" : "missed";
+      const delay = rng > 0.12 ? Math.floor(Math.random() * 20) : 0;
+      const takenTime = status === "taken" ? new Date(scheduled.getTime() + delay * 60000) : null;
+      logs.push({
+        id: i * 10 + j,
+        user_id: 1,
+        medicine_id: medId,
+        medicine_name: medId === 1 ? "Metformin" : medId === 2 ? "Lisinopril" : "Atorvastatin",
+        scheduled_time: scheduled.toISOString(),
+        taken_time: takenTime?.toISOString() || null,
+        status,
+        delay_minutes: delay,
+      });
+    });
+  }
+  return logs;
+})();
+
+export const MOCK_MY_DEVICE: MyDevice = {
+  id: 1,
+  device_id: "SB-A2-8891",
+  battery: 82,
+  wifi_status: "connected",
+  temperature: 24.5,
+  weight: 128,
+  lid_status: "closed",
+  firmware_version: "3.2.1",
+  last_sync: new Date(Date.now() - 5 * 60000).toISOString(),
+};
+
+export const MOCK_DEVICE_EVENTS = [
+  { id: 1, device_id: "SB-A2-8891", event_type: "open", timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {}, created_at: new Date(Date.now() - 3600000).toISOString() },
+  { id: 2, device_id: "SB-A2-8891", event_type: "close", timestamp: new Date(Date.now() - 3550000).toISOString(), metadata: { weight_diff: -2 }, created_at: new Date(Date.now() - 3550000).toISOString() },
+  { id: 3, device_id: "SB-A2-8891", event_type: "sync", timestamp: new Date(Date.now() - 5 * 60000).toISOString(), metadata: { battery: 82 }, created_at: new Date(Date.now() - 5 * 60000).toISOString() },
+];
+
+export const MOCK_CONSULTATIONS: Consultation[] = [
+  { id: 1, patient_id: 1, doctor_id: 2, scheduled_for: new Date(Date.now() + 24 * 3600000).toISOString(), status: "confirmed", consultation_type: "video", consultation_notes: null, prescription_status: "pending", created_at: new Date().toISOString() },
+  { id: 2, patient_id: 1, doctor_id: 2, scheduled_for: new Date(Date.now() + 4 * 24 * 3600000).toISOString(), status: "pending", consultation_type: "prescription_review", consultation_notes: null, prescription_status: "none", created_at: new Date().toISOString() },
+];
+
 export const MOCK_NOTIFICATIONS: AppNotification[] = [
   { id: 1, title: "Medicine Taken", message: "Metformin 500mg logged at 8:02 AM", type: "success", read: false, created_at: new Date(Date.now() - 2 * 60000).toISOString() },
   { id: 2, title: "Refill Reminder", message: "Atorvastatin — 5 days left, refill soon", type: "warning", read: false, created_at: new Date(Date.now() - 60 * 60000).toISOString() },
@@ -152,33 +208,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       ] as T;
     }
 
-    if (path.includes("/medicines/logs")) {
-      const logs: { id: number; medicine_id: number; scheduled_time: string; status: string; delay_minutes: number }[] = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        [1, 2, 3].forEach((medId, j) => {
-          const scheduled = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 8 + j * 2, 0);
-          const rng = Math.random();
-          logs.push({
-            id: i * 10 + j,
-            medicine_id: medId,
-            scheduled_time: scheduled.toISOString(),
-            status: rng > 0.12 ? "taken" : "missed",
-            delay_minutes: rng > 0.12 ? Math.floor(Math.random() * 20) : 0,
-          });
-        });
-      }
-      return logs as T;
+    if (path.includes("/medicines/logs") && !path.includes("/today")) {
+      return MOCK_MED_LOGS as T;
     }
 
-    if (path.includes("/medicines")) {
-      return [
-        { id: 1, patient_id: 1, medicine_name: "Metformin", dosage: "500mg", frequency: "Twice daily", schedule: ["8:00 AM", "8:00 PM"], instructions: "With meals", remaining_pills: 24, status: "active", auto_refill: true },
-        { id: 2, patient_id: 1, medicine_name: "Lisinopril", dosage: "10mg", frequency: "Once daily", schedule: ["9:00 AM"], instructions: "Any time", remaining_pills: 18, status: "active", auto_refill: false },
-        { id: 3, patient_id: 1, medicine_name: "Atorvastatin", dosage: "20mg", frequency: "Once daily", schedule: ["10:00 PM"], instructions: "With or without food", remaining_pills: 12, status: "active", auto_refill: false },
-        { id: 4, patient_id: 1, medicine_name: "Aspirin", dosage: "81mg", frequency: "Once daily", schedule: ["9:00 AM"], instructions: "With food", remaining_pills: 30, status: "active", auto_refill: true },
-      ] as T;
+    if (path.includes("/medicines") && options.method !== "POST" && options.method !== "PUT") {
+      return MOCK_MEDICINES as T;
     }
 
     // ─── AI Prediction ────────────────────────────────────────────────────────
@@ -228,17 +263,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
     // ─── My Smart Bottle device ───────────────────────────────────────────────
     if (path.includes("/devices/me")) {
-      return {
-        id: 1,
-        device_id: "SB-A2-8891",
-        battery: 82,
-        wifi_status: "connected",
-        temperature: 24.5,
-        weight: 128,
-        lid_status: "closed",
-        firmware_version: "3.2.1",
-        last_sync: new Date(Date.now() - 5 * 60000).toISOString(),
-      } as T;
+      return MOCK_MY_DEVICE as T;
+    }
+
+    if (path.includes("/events") && path.includes("/devices")) {
+      return MOCK_DEVICE_EVENTS as T;
     }
 
     // ─── Notifications ────────────────────────────────────────────────────────
@@ -248,10 +277,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
     // ─── Telemedicine ─────────────────────────────────────────────────────────
     if (path.includes("/telemedicine")) {
-      return [
-        { id: 1, patient_id: 1, doctor_id: 2, scheduled_for: new Date(Date.now() + 24 * 3600000).toISOString(), status: "confirmed", consultation_type: "video", consultation_notes: null, prescription_status: "pending", created_at: new Date().toISOString() },
-        { id: 2, patient_id: 1, doctor_id: 2, scheduled_for: new Date(Date.now() + 4 * 24 * 3600000).toISOString(), status: "pending", consultation_type: "prescription_review", consultation_notes: null, prescription_status: "none", created_at: new Date().toISOString() },
-      ] as T;
+      return MOCK_CONSULTATIONS as T;
+    }
+
+    if (path.includes("/profiles/doctor/me")) {
+      return { id: 1, user_id: 2, availability_status: "available", specialization: "Cardiology", hospital: "MediMind Central" } as T;
     }
 
     // ─── AI Conversations ─────────────────────────────────────────────────────

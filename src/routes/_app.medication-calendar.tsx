@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Check, X, Clock } from "lucide-react";
-import { getMedicationLogsRange } from "@/lib/api";
+import { getMedicationLogsRange, MOCK_MED_LOGS } from "@/lib/api";
 import { useMedicationCalendar, type CalendarLog } from "@/hooks/use-medication-calendar";
 
 export const Route = createFileRoute("/_app/medication-calendar")({ component: FullMedicationCalendar });
@@ -27,7 +27,7 @@ interface LogEntry {
 function FullMedicationCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logs, setLogs] = useState<LogEntry[]>(MOCK_MED_LOGS as any);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -35,7 +35,7 @@ function FullMedicationCalendar() {
   useEffect(() => {
     const start = new Date(year, month, 1).toISOString();
     const end = new Date(year, month + 1, 1).toISOString();
-    getMedicationLogsRange(start, end).then((data) => setLogs(data as LogEntry[])).catch(() => setLogs([]));
+    getMedicationLogsRange(start, end).then((data) => setLogs(data as LogEntry[])).catch((err) => console.warn("Using instant mock data:", err));
   }, [year, month]);
 
   const days = useMedicationCalendar(logs as CalendarLog[], year, month);
