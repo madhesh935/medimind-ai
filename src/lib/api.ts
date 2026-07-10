@@ -8,19 +8,25 @@ const BASE_URL = "http://localhost:8000/api/v1";
 
 // ─────────────────────────── Auth helpers ────────────────────────────
 function getToken(): string | null {
+  if (typeof window === "undefined") return null;
   return localStorage.getItem("medimind.token");
 }
 
 function setToken(token: string) {
-  localStorage.setItem("medimind.token", token);
+  if (typeof window !== "undefined") {
+    localStorage.setItem("medimind.token", token);
+  }
 }
 
 function removeToken() {
-  localStorage.removeItem("medimind.token");
-  localStorage.removeItem("medimind.user");
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("medimind.token");
+    localStorage.removeItem("medimind.user");
+  }
 }
 
 export function getStoredUser(): LoginResponse["user"] | null {
+  if (typeof window === "undefined") return null;
   const raw = localStorage.getItem("medimind.user");
   return raw ? JSON.parse(raw) : null;
 }
@@ -426,7 +432,9 @@ export async function apiLogin(email: string, password: string): Promise<LoginRe
   }
 
   setToken(data.access_token);
-  localStorage.setItem("medimind.user", JSON.stringify(data.user));
+  if (typeof window !== "undefined") {
+    localStorage.setItem("medimind.user", JSON.stringify(data.user));
+  }
   return data;
 }
 
