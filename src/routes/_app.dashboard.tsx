@@ -168,9 +168,6 @@ function PatientDashboard() {
           <Button asChild variant="outline" className="h-10 rounded-xl border border-border/60 bg-card hover:bg-muted font-semibold px-4 transition-all inline-flex items-center justify-center gap-2 shadow-xs">
             <Link to="/reports"><FileText className="h-4 w-4" />View report</Link>
           </Button>
-          <Button onClick={() => toast.error("SOS Alert Dispatched to Emergency Contacts!")} variant="destructive" className="h-10 rounded-xl font-semibold px-4 transition-all inline-flex items-center justify-center gap-2 shadow-xs">
-            <AlertTriangle className="h-4 w-4" />Emergency SOS
-          </Button>
         </div>
       </div>
 

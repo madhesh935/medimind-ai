@@ -83,7 +83,10 @@ export const MOCK_MEDICINES: Medicine[] = [
 ];
 
 export const MOCK_MED_LOGS = (() => {
-  const logs = [];
+  const logs: {
+    id: number; user_id: number; medicine_id: number; medicine_name: string;
+    scheduled_time: string; taken_time: string | null; status: string; delay_minutes: number;
+  }[] = [];
   for (let i = 29; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
@@ -315,7 +318,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       } else if (q.includes("interact") || q.includes("side effect")) {
         reply = "Metformin can interact with **alcohol** and **iodinated contrast media**. Lisinopril should not be taken with **potassium supplements**. Atorvastatin may be affected by **grapefruit juice**. Always consult Dr. Patel before making changes.";
       } else if (q.includes("pain") || q.includes("feel") || q.includes("symptom")) {
-        reply = "I'm sorry you're not feeling well. If you're experiencing **severe pain or an emergency**, please call emergency services or use the SOS button on your dashboard. For medication side effects, I recommend contacting Dr. Patel directly through the Telemedicine portal.";
+        reply = "I'm sorry you're not feeling well. If you're experiencing **severe pain or an emergency**, please call emergency services immediately. For medication side effects, I recommend contacting Dr. Patel directly through the Telemedicine portal.";
       }
       return { id: Date.now(), sender: "ai", message: reply, created_at: new Date().toISOString() } as T;
     }

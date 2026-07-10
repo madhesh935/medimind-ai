@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/stat-card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Download, FileText, Printer, Sheet, Calendar as CalendarIcon, Activity, Share2,
-  Flame, HeartPulse, Brain, AlertTriangle, Users, ShieldAlert, HardDrive, ServerCog, CheckCircle2, Gauge,
+  Download, FileText, Sheet, Calendar as CalendarIcon, Activity, Share2,
+  Flame, Brain, HeartPulse, AlertTriangle, Users, ShieldAlert, HardDrive, ServerCog, CheckCircle2, Gauge,
   Mail, Link as LinkIcon, Check, Copy, Sparkles,
 } from "lucide-react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis, RadialBar, RadialBarChart } from "recharts";
@@ -40,47 +40,30 @@ function Reports() {
   return <PatientReports />;
 }
 
-function exportToCsv(filename: string, rows: any[]) {
-  if (!rows || !rows.length) {
-    toast.error("No data to export");
-    return;
-  }
+// ─────────────────────────── Export Utilities ────────────────────────────
+
+type Row = Record<string, string | number | boolean | null | undefined>;
+
+function exportToCsv(filename: string, rows: Row[]) {
+  if (!rows || !rows.length) { toast.error("No data to export"); return; }
   const headers = Object.keys(rows[0]).join(",");
-  const csvContent = rows.map(r => Object.values(r).map(v => `"${v}"`).join(",")).join("\n");
-  const blob = new Blob([headers + "\n" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute("download", `${filename}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  toast.success(`Exported ${filename}.csv`);
+  const csvContent = rows.map(r =>
+    Object.values(r).map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")
+  ).join("\n");
+  triggerDownload(new Blob([headers + "\n" + csvContent], { type: "text/csv;charset=utf-8;" }), `${filename}.csv`);
+  toast.success(`Downloaded ${filename}.csv`);
 }
 
-function exportToExcel(filename: string, rows: any[]) {
-  if (!rows || !rows.length) {
-    toast.error("No data to export");
-    return;
-  }
+function exportToExcel(filename: string, rows: Row[]) {
+  if (!rows || !rows.length) { toast.error("No data to export"); return; }
   const keys = Object.keys(rows[0]);
-  
-  // Create a clean XML Spreadsheet 2003 template
   let xml = '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?>';
   xml += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ';
-  xml += 'xmlns:o="urn:schemas-microsoft-com:office:office" ';
-  xml += 'xmlns:x="urn:schemas-microsoft-com:office:excel" ';
-  xml += 'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" ';
-  xml += 'xmlns:html="http://www.w3.org/TR/REC-html40">';
+  xml += 'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';
   xml += '<Worksheet ss:Name="Report"><Table>';
-  
-  // Headers Row
   xml += '<Row ss:Height="22">';
-  keys.forEach(k => {
-    xml += `<Cell><Data ss:Type="String">${k}</Data></Cell>`;
-  });
+  keys.forEach(k => { xml += `<Cell><Data ss:Type="String">${k}</Data></Cell>`; });
   xml += '</Row>';
-  
-  // Data Rows
   rows.forEach(r => {
     xml += '<Row>';
     keys.forEach(k => {
@@ -90,17 +73,114 @@ function exportToExcel(filename: string, rows: any[]) {
     });
     xml += '</Row>';
   });
-  
   xml += '</Table></Worksheet></Workbook>';
-  
-  const blob = new Blob([xml], { type: "application/vnd.ms-excel" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.setAttribute("download", `${filename}.xls`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  toast.success(`Exported ${filename}.xls`);
+  triggerDownload(new Blob([xml], { type: "application/vnd.ms-excel" }), `${filename}.xls`);
+  toast.success(`Downloaded ${filename}.xls`);
+}
+
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Generates a properly structured PDF from raw data arrays — no DOM capture
+function exportToPdf(title: string, sections: { heading: string; rows: Row[]; columns?: string[] }[]) {
+  import("jspdf").then(({ jsPDF }) => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    const colW = pageW - margin * 2;
+    let y = 20;
+
+    // ── Header ──────────────────────────────────────────────
+    doc.setFillColor(20, 20, 40);
+    doc.rect(0, 0, pageW, 16, "F");
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    doc.text("MediMind AI", margin, 10);
+    doc.setFontSize(8);
+    doc.setTextColor(160, 160, 200);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, pageW - margin, 10, { align: "right" });
+
+    y = 26;
+    doc.setFontSize(18);
+    doc.setTextColor(20, 20, 40);
+    doc.text(title, margin, y);
+    y += 4;
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(99, 102, 241);
+    doc.line(margin, y, pageW - margin, y);
+    y += 8;
+
+    for (const section of sections) {
+      if (!section.rows.length) continue;
+
+      // Check if we need a new page
+      if (y > pageH - 30) { doc.addPage(); y = 24; }
+
+      // Section heading
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 100);
+      doc.setFont("helvetica", "bold");
+      doc.text(section.heading, margin, y);
+      y += 5;
+      doc.setFont("helvetica", "normal");
+
+      const keys = section.columns ?? Object.keys(section.rows[0]);
+      const cellW = colW / keys.length;
+
+      // Table header row
+      doc.setFillColor(240, 240, 255);
+      doc.rect(margin, y, colW, 7, "F");
+      doc.setFontSize(8);
+      doc.setTextColor(40, 40, 80);
+      doc.setFont("helvetica", "bold");
+      keys.forEach((k, i) => {
+        doc.text(k, margin + i * cellW + 2, y + 5);
+      });
+      y += 7;
+      doc.setFont("helvetica", "normal");
+
+      // Data rows
+      section.rows.forEach((row, ri) => {
+        if (y > pageH - 20) { doc.addPage(); y = 24; }
+        if (ri % 2 === 0) {
+          doc.setFillColor(250, 250, 255);
+          doc.rect(margin, y, colW, 6, "F");
+        }
+        doc.setFontSize(7.5);
+        doc.setTextColor(30, 30, 60);
+        keys.forEach((k, i) => {
+          const val = String(row[k] ?? "");
+          doc.text(val.substring(0, 28), margin + i * cellW + 2, y + 4);
+        });
+        y += 6;
+      });
+
+      // Row count footer
+      doc.setFontSize(7);
+      doc.setTextColor(120, 120, 150);
+      doc.text(`${section.rows.length} record(s)`, margin, y + 3);
+      y += 10;
+    }
+
+    // Page footer
+    const pageCount = doc.getNumberOfPages();
+    for (let p = 1; p <= pageCount; p++) {
+      doc.setPage(p);
+      doc.setFontSize(7);
+      doc.setTextColor(160, 160, 180);
+      doc.text(`Page ${p} of ${pageCount}  •  MediMind AI Confidential`, pageW / 2, pageH - 6, { align: "center" });
+    }
+
+    doc.save(`${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`);
+    toast.success(`Downloaded ${title}.pdf`);
+  }).catch(() => toast.error("PDF engine failed to load — try CSV instead."));
 }
 
 // ─────────────────────────── Share Dialog ────────────────────────────
@@ -201,72 +281,37 @@ function ReportHeader({
   description, 
   shareLabel, 
   onExport,
+  onPdf,
   onShare
 }: { 
   title: string; 
   description: string; 
   shareLabel: string; 
   onExport?: (type: "csv" | "excel") => void;
+  onPdf?: () => void;
   onShare?: () => void;
 }) {
   return (
-    <>
-      {/* Dynamic print stylesheet injected for reports route */}
-      <style>{`
-        @media print {
-          body {
-            background: white !important;
-            color: black !important;
-          }
-          /* Hide sidebar, navigation, floating widgets and page controls */
-          [data-sidebar="sidebar"],
-          header,
-          .print\\:hidden,
-          button,
-          .floating-chat,
-          .floating-chat-trigger,
-          #floating-chat-trigger,
-          #floating-chat-window {
-            display: none !important;
-          }
-          main {
-            padding: 0 !important;
-            margin: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          .card {
-            border: 1px solid #e2e8f0 !important;
-            box-shadow: none !important;
-            break-inside: avoid;
-          }
-        }
-      `}</style>
-
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 print:mb-6">
-        <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-transparent print:text-black print:bg-none">{title}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
-        </div>
-        <div className="flex flex-wrap gap-2 print:hidden">
-          <Button onClick={() => window.print()} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
-            <FileText className="mr-1.5 h-4 w-4 text-destructive" /> PDF
-          </Button>
-          <Button onClick={() => onExport ? onExport("excel") : toast.info("Excel export not configured")} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
-            <Sheet className="mr-1.5 h-4 w-4 text-success" /> Excel
-          </Button>
-          <Button onClick={() => onExport ? onExport("csv") : toast.info("CSV export not configured")} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
-            <Download className="mr-1.5 h-4 w-4 text-muted-foreground" /> CSV
-          </Button>
-          <Button onClick={() => window.print()} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
-            <Printer className="mr-1.5 h-4 w-4 text-muted-foreground" /> Print
-          </Button>
-          <Button onClick={() => onShare ? onShare() : toast.success(shareLabel)} className="rounded-xl bg-gradient-primary shadow-sm hover:shadow transition-all duration-300">
-            <Share2 className="mr-1.5 h-4 w-4" /> Share
-          </Button>
-        </div>
+    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div>
+        <h1 className="font-display text-3xl font-bold tracking-tight bg-gradient-to-br from-slate-900 to-slate-600 bg-clip-text text-transparent">{title}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{description}</p>
       </div>
-    </>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={() => onPdf ? onPdf() : toast.info("PDF export not configured")} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
+          <FileText className="mr-1.5 h-4 w-4 text-destructive" /> PDF
+        </Button>
+        <Button onClick={() => onExport ? onExport("excel") : toast.info("Excel export not configured")} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
+          <Sheet className="mr-1.5 h-4 w-4 text-success" /> Excel
+        </Button>
+        <Button onClick={() => onExport ? onExport("csv") : toast.info("CSV export not configured")} variant="outline" className="rounded-xl border-border/60 hover:bg-slate-50 transition-colors">
+          <Download className="mr-1.5 h-4 w-4 text-muted-foreground" /> CSV
+        </Button>
+        <Button onClick={() => onShare ? onShare() : toast.success(shareLabel)} className="rounded-xl bg-gradient-primary shadow-sm hover:shadow transition-all duration-300">
+          <Share2 className="mr-1.5 h-4 w-4" /> Share
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -383,6 +428,30 @@ function PatientReports() {
         description="Comprehensive overview of your adherence, risks, and health trends."
         shareLabel="Share this report with your doctor"
         onExport={handleExport}
+        onPdf={() => exportToPdf("Health Analytics Report", [
+          {
+            heading: "Medication Adherence Log",
+            rows: logs.map(l => ({
+              Date: new Date(l.scheduled_time).toLocaleDateString(),
+              Time: new Date(l.scheduled_time).toLocaleTimeString(),
+              Medicine: medicineById.get(l.medicine_id)?.medicine_name ?? `#${l.medicine_id}`,
+              Status: l.status,
+              "Delay (min)": l.delay_minutes,
+            })),
+            columns: ["Date", "Time", "Medicine", "Status", "Delay (min)"],
+          },
+          {
+            heading: "Active Medications",
+            rows: medicines.map(m => ({
+              Name: m.medicine_name,
+              Dosage: m.dosage,
+              Frequency: m.frequency,
+              Remaining: m.remaining_pills,
+              "Auto Refill": m.auto_refill ? "Yes" : "No",
+            })),
+            columns: ["Name", "Dosage", "Frequency", "Remaining", "Auto Refill"],
+          },
+        ])}
         onShare={() => setIsShareOpen(true)}
       />
 
@@ -595,6 +664,19 @@ function DoctorReports() {
         description="Aggregate adherence, risk and outcomes across your patient panel."
         shareLabel="Report shared with hospital admin"
         onExport={handleExport}
+        onPdf={() => exportToPdf("Clinic Analytics Report", [
+          {
+            heading: "Patient Adherence Roster",
+            rows: roster.map(p => ({
+              Name: p.name,
+              Risk: p.risk,
+              "Adherence %": p.adherence,
+              Status: p.status,
+              Medications: p.medications.join("; "),
+            })),
+            columns: ["Name", "Risk", "Adherence %", "Status", "Medications"],
+          },
+        ])}
         onShare={() => setIsShareOpen(true)}
       />
 
@@ -740,6 +822,24 @@ function AdminReports() {
         description="Hospital-wide usage, adherence and system health overview."
         shareLabel="Report shared with hospital board"
         onExport={handleExport}
+        onPdf={() => exportToPdf("Platform Analytics Report", [
+          {
+            heading: "Doctor Roster",
+            rows: doctors.map(d => ({
+              Name: d.name,
+              Specialization: d.specialization ?? "General",
+              Hospital: d.hospital ?? "—",
+              Patients: d.patients_count,
+              Status: d.status,
+            })),
+            columns: ["Name", "Specialization", "Hospital", "Patients", "Status"],
+          },
+          {
+            heading: "User Role Breakdown",
+            rows: roleBreakdown.map(r => ({ Role: r.name, Count: r.value })),
+            columns: ["Role", "Count"],
+          },
+        ])}
         onShare={() => setIsShareOpen(true)}
       />
 
